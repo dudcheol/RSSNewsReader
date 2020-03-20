@@ -1,12 +1,14 @@
-package com.example.rssnewsreader
+package com.example.rssnewsreader.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import com.example.rssnewsreader.R
 
-class MainActivity : AppCompatActivity() {
+class NewsListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        setContentView(R.layout.newslist_activity)
     }
 }
+

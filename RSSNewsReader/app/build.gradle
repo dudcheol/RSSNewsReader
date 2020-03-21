@@ -27,6 +27,11 @@ android {
     dataBinding {
         enabled = true
     }
+
+    compileOptions {
+        sourceCompatibility 1.8
+        targetCompatibility 1.8
+    }
 }
 
 dependencies {
@@ -40,9 +45,11 @@ dependencies {
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
 
     /**
-     * 사용 라이브러리
-     * Retrofit
+     * 사용 라이브러리 출처
+     * Retrofit : https://github.com/square/retrofit
+     * OkHttp : https://github.com/square/okhttp
      */
     implementation 'com.squareup.retrofit2:retrofit:2.7.2'
     implementation 'com.squareup.retrofit2:converter-simplexml:2.7.2'
+    implementation 'com.squareup.okhttp3:logging-interceptor:4.4.0'
 }

@@ -5,6 +5,6 @@ import retrofit2.Call
 import retrofit2.http.GET
 
 interface RssService {
-    @GET("feed")
+    @GET("rss?hl=ko&gl=KR&ceid=KR:ko")
     fun getFeed(): Call<RssFeed>
 }

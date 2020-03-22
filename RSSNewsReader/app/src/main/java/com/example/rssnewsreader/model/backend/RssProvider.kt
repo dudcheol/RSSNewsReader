@@ -27,7 +27,7 @@ class RssProvider : Callback<RssFeed> {
 
         val retrofit = builder.build()
 
-        val rssService = retrofit.create(RssService::class.java)
+        val rssService = retrofit.create(APIInterface::class.java)
 
         val call = rssService.getFeed()
         call.enqueue(this)

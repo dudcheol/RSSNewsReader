@@ -2,22 +2,31 @@ package com.example.rssnewsreader.repository
 
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.rssnewsreader.model.backend.APIInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
-import com.example.rssnewsreader.model.backend.RssService
 import com.example.rssnewsreader.model.datamodel.RssFeed
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
+import okhttp3.Headers
+import retrofit2.*
+import retrofit2.http.Header
 
 class RssRepository {
-    val LOG = "RssRepository"
-    val rssService: RssService = RetrofitService.createService(RssService::class.java)
+    val Tag = "RssRepository"
+    val rssParseAPI: APIInterface = RetrofitService.createService(APIInterface::class.java)
+    lateinit var htmlParseAPI: APIInterface
+
+    companion object {
+        val rssRepository: RssRepository = RssRepository()
+
+        fun getInstance() = rssRepository
+    }
 
     fun getRssFeed(): MutableLiveData<RssFeed> {
         val rssData = MutableLiveData<RssFeed>()
-        rssService.getFeed().enqueue(object : Callback<RssFeed> {
+        val headers = MutableLiveData<Headers>()
+
+        rssParseAPI.getFeed().enqueue(object : Callback<RssFeed> {
             override fun onFailure(call: Call<RssFeed>, t: Throwable) {
-                Log.e(LOG, "onFailure")
+                Log.e(Tag, "getFeed - onFailure")
             }
 
             override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
@@ -29,9 +38,24 @@ class RssRepository {
         return rssData
     }
 
-    companion object {
-        val rssRepository: RssRepository = RssRepository()
+    fun getHeaders(link: String): HashMap<String, String> {
+        Log.e(Tag, "getHeaders.link = $link")
 
-        fun getInstance() = rssRepository
+        htmlParseAPI = RetrofitService.buildHtmlService(link, APIInterface::class.java)
+        val retMap = HashMap<String, String>()
+        htmlParseAPI.getHeaders("").enqueue(object : Callback<List<Header>> {
+            override fun onFailure(call: Call<List<Header>>, t: Throwable) {
+                Log.e(Tag, "getDetailItem - onFailure")
+            }
+
+            override fun onResponse(call: Call<List<Header>>, response: Response<List<Header>>) {
+                if (response.isSuccessful) {
+                    retMap["image"] = response.headers()["og:image"].toString()
+                    retMap["description"] = response.headers()["og:description"].toString()
+                }
+            }
+        })
+
+        return retMap
     }
 }

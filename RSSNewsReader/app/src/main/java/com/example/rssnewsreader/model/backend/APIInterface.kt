@@ -1,6 +1,8 @@
 package com.example.rssnewsreader.model.backend
 
 import com.example.rssnewsreader.model.datamodel.RssFeed
+import okhttp3.ResponseBody
+import org.jsoup.nodes.Document
 import retrofit2.Call
 import retrofit2.http.GET
 import retrofit2.http.Header
@@ -12,5 +14,5 @@ interface APIInterface {
     fun getFeed(): Call<RssFeed>
 
     @GET
-    fun getHeaders(@Url link: String): Call<List<Header>>
+    fun getHeaders(@Url link: String): Call<Document>
 }

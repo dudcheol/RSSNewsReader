@@ -1,13 +1,17 @@
 package com.example.rssnewsreader.repository
 
+import android.content.res.Resources
 import android.util.Log
 import androidx.lifecycle.MutableLiveData
+import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.backend.APIInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import okhttp3.Headers
-import retrofit2.*
-import retrofit2.http.Header
+import org.jsoup.nodes.Document
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 
 class RssRepository {
     val Tag = "RssRepository"
@@ -43,15 +47,19 @@ class RssRepository {
 
         htmlParseAPI = RetrofitService.buildHtmlService(link, APIInterface::class.java)
         val retMap = HashMap<String, String>()
-        htmlParseAPI.getHeaders("").enqueue(object : Callback<List<Header>> {
-            override fun onFailure(call: Call<List<Header>>, t: Throwable) {
-                Log.e(Tag, "getDetailItem - onFailure")
+        htmlParseAPI.getHeaders(link).enqueue(object : Callback<Document> {
+            override fun onFailure(call: Call<Document>, t: Throwable) {
+                Log.e(Tag, "getDetailItem - onFailure - $t")
             }
 
-            override fun onResponse(call: Call<List<Header>>, response: Response<List<Header>>) {
+            override fun onResponse(call: Call<Document>, response: Response<Document>) {
                 if (response.isSuccessful) {
-                    retMap["image"] = response.headers()["og:image"].toString()
-                    retMap["description"] = response.headers()["og:description"].toString()
+                    retMap["description"] = response.body()?.run {
+                        select("meta[property=og:description]")?.attr("content")
+                    } ?: Resources.getSystem().getString(R.string.load_error)
+                    retMap["image"] = response.body()?.run {
+                        select("meta[property=og:image]")?.attr("content")
+                    } ?: Resources.getSystem().getString(R.string.load_error)
                 }
             }
         })

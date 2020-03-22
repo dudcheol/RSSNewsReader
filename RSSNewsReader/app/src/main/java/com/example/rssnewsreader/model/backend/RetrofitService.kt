@@ -4,7 +4,7 @@ import android.util.Log
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
+import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 class RetrofitService {
@@ -12,7 +12,7 @@ class RetrofitService {
         const val Tag = "RetrofitService"
 
         val interceptor = HttpLoggingInterceptor()
-            .apply { setLevel(HttpLoggingInterceptor.Level.BODY) }
+            .run { setLevel(HttpLoggingInterceptor.Level.BODY) }
         val client = OkHttpClient.Builder()
             .addInterceptor(interceptor).build()
         val rssRetrofit = Retrofit.Builder()
@@ -26,8 +26,8 @@ class RetrofitService {
         fun buildHtmlService(link: String, serviceClass: Class<APIInterface>): APIInterface {
             Log.e(Tag, "RetrofitService.buildHtmlService.link = $link")
             return Retrofit.Builder()
-                .baseUrl(link)
-                .addConverterFactory(GsonConverterFactory.create())
+                .baseUrl("https://news.google.com/rss/")
+                .addConverterFactory(JsoupConverterFactory)
                 .client(client)
                 .build()
                 .create(serviceClass)

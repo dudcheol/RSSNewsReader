@@ -43,10 +43,10 @@ class NewsListActivity : AppCompatActivity() {
                 binding.state = it.channel.item.toString()
 
                 // note : it 가공한다. it에 있는 아이템마다 이미지,본문내용을 가져온 것을 map에 넣고 그것을 submitlist 한다
-                for (item in it.channel.item) {
-                    newsListViewModel.getItemDetail(item)
-                }
-                adapter.submitList(it.channel.item)
+                val mapList = ArrayList<Map<String, String>>()
+                for (item in it.channel.item)
+                    mapList.add(newsListViewModel.getItemDetail(item))
+                adapter.submitList(mapList)
             })
     }
 

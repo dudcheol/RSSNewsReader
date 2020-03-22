@@ -7,11 +7,11 @@ import androidx.databinding.DataBindingUtil
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistItemBinding
-import com.example.rssnewsreader.model.datamodel.RssItem
 
-class NewsListAdapter : ListAdapter<RssItem, NewsListViewHolder>(diffCallback) {
+class NewsListAdapter : ListAdapter<Map<String, String>, NewsListViewHolder>(diffCallback) {
 
     companion object {
         const val Tag = "NewsListAdapter"
@@ -38,11 +38,11 @@ class NewsListAdapter : ListAdapter<RssItem, NewsListViewHolder>(diffCallback) {
 
 }
 
-private val diffCallback = object : DiffUtil.ItemCallback<RssItem>() {
-    override fun areItemsTheSame(oldItem: RssItem, newItem: RssItem): Boolean =
+private val diffCallback = object : DiffUtil.ItemCallback<Map<String, String>>() {
+    override fun areItemsTheSame(oldItem: Map<String, String>, newItem: Map<String, String>): Boolean =
         oldItem == newItem
 
-    override fun areContentsTheSame(oldItem: RssItem, newItem: RssItem): Boolean =
+    override fun areContentsTheSame(oldItem: Map<String, String>, newItem: Map<String, String>): Boolean =
         oldItem == newItem
 }
 
@@ -50,7 +50,13 @@ class NewsListViewHolder(private val binding: NewslistItemBinding) : RecyclerVie
     binding.root
 ) {
     fun bindTo(item: Any) {
-        binding.listItemTitle.text = (item as? RssItem)?.title
-        binding.listItemContent.text = (item as? RssItem)?.description
+        (item as HashMap<String, String>).let {
+            binding.listItemTitle.text = it["title"]
+            binding.listItemContent.text = it["description"]
+            binding.listItemKeyword.text = it["keyword"]
+            Glide.with(binding.root)
+                .load(it["image"])
+                .into(binding.listItemImage)
+        }
     }
 }

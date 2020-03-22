@@ -9,11 +9,11 @@ class NewsListViewModel : ViewModel() {
 
     fun getRssRepository() = rssFeedLiveData
 
-    fun getItemDetail(item: RssItem): Map<String, String> =
+    fun getItemDetail(item: RssItem): HashMap<String, String> =
         RssRepository.getInstance()
             .getHeaders(
                 // note : baseUrl must end "/"
-                if (item.link.last() == '/') item.link
+                if (item.link.endsWith('/')) item.link
                 else "${item.link}/"
             ).apply {
                 put("title", item.title)

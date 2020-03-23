@@ -39,25 +39,30 @@ class NewsListAdapter : ListAdapter<HashMap<String, String>, NewsListViewHolder>
 }
 
 private val diffCallback = object : DiffUtil.ItemCallback<HashMap<String, String>>() {
-    override fun areItemsTheSame(oldItem: HashMap<String, String>, newItem: HashMap<String, String>): Boolean =
+    override fun areItemsTheSame(
+        oldItem: HashMap<String, String>,
+        newItem: HashMap<String, String>
+    ): Boolean =
         oldItem == newItem
 
-    override fun areContentsTheSame(oldItem: HashMap<String, String>, newItem: HashMap<String, String>): Boolean =
+    override fun areContentsTheSame(
+        oldItem: HashMap<String, String>,
+        newItem: HashMap<String, String>
+    ): Boolean =
         oldItem == newItem
 }
 
 class NewsListViewHolder(private val binding: NewslistItemBinding) : RecyclerView.ViewHolder(
     binding.root
 ) {
-    fun bindTo(item: Any) {
-        (item as HashMap<String, String>).let {
-            Log.e("NewsListAdapter", it.toString())
-            binding.listItemTitle.text = it["title"]
-            binding.listItemContent.text = it["description"]
-            binding.listItemKeyword.text = it["keyword"]
-            Glide.with(binding.root)
-                .load(it["image"])
-                .into(binding.listItemImage)
-        }
+    fun bindTo(item: HashMap<String, String>) {
+        Log.e("NewsListAdapter", item.toString())
+        binding.listItemTitle.text = item["title"]
+        binding.listItemContent.text = item["description"]
+        binding.listItemKeyword.text = item["keyword"]
+        Glide.with(binding.root)
+            .load(item["image"])
+            .placeholder(R.drawable.ic_launcher_background)
+            .into(binding.listItemImage)
     }
 }

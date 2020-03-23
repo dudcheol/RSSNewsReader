@@ -1,6 +1,7 @@
 package com.example.rssnewsreader.model.backend
 
 import com.example.rssnewsreader.model.datamodel.RssFeed
+import io.reactivex.rxjava3.core.Single
 import org.jsoup.nodes.Document
 import retrofit2.Call
 import retrofit2.http.GET
@@ -12,4 +13,7 @@ interface APIInterface {
 
     @GET
     fun getHeaders(@Url link: String): Call<Document>
+
+    @GET
+    fun getDetailItem(@Url link: String): Single<Document>
 }

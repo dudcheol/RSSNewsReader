@@ -8,14 +8,7 @@ import com.example.rssnewsreader.model.backend.APIInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.functions.Function
-import io.reactivex.rxjava3.schedulers.Schedulers
-import okhttp3.Headers
 import org.jsoup.nodes.Document
 import retrofit2.Call
 import retrofit2.Callback
@@ -23,9 +16,9 @@ import retrofit2.Response
 
 class RssRepository {
     private val rssParseAPI: APIInterface = RetrofitService.createService(APIInterface::class.java)
-    lateinit var htmlParseAPI: APIInterface
+
+    //    lateinit var htmlParseAPI: APIInterface
     private val observableList = ArrayList<Observable<Any>>()
-    private val compositeDisposable = CompositeDisposable()
 
     companion object {
         const val Tag = "RssRepository"
@@ -36,11 +29,11 @@ class RssRepository {
 
     fun getRssFeed(): MutableLiveData<RssFeed> {
         val rssData = MutableLiveData<RssFeed>()
-        val headers = MutableLiveData<Headers>()
 
         rssParseAPI.getFeed().enqueue(object : Callback<RssFeed> {
             override fun onFailure(call: Call<RssFeed>, t: Throwable) {
-                Log.e(Tag, "getFeed - onFailure")
+                Log.e(Tag, "getFeed - onFailure - $t")
+                getRssFeed() // Todo : 처리필요함
             }
 
             override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
@@ -52,53 +45,69 @@ class RssRepository {
         return rssData
     }
 
-    // Todo : 라이브데이터 리턴
-    fun getHeaders(link: String): MutableLiveData<HashMap<String, String>> {
-        Log.e(Tag, "getHeaders.link = $link")
-
-        htmlParseAPI = RetrofitService.buildHtmlService(link, APIInterface::class.java)
-        val retMap = MutableLiveData<HashMap<String, String>>()
-        htmlParseAPI.getHeaders(link).enqueue(object : Callback<Document> {
-            override fun onFailure(call: Call<Document>, t: Throwable) {
-                Log.e(Tag, "getDetailItem - onFailure - $t")
-            }
-
-            override fun onResponse(call: Call<Document>, response: Response<Document>) {
-                if (response.isSuccessful) {
-                    retMap.postValue(
-                        HashMap<String, String>().apply {
-                            put("description",
-                                response.body()?.run {
-                                    select("meta[property=og:description]")?.attr("content")
-                                } ?: Resources.getSystem().getString(R.string.load_error))
-                            put("image",
-                                response.body()?.run {
-                                    select("meta[property=og:image]")?.attr("content")
-                                } ?: Resources.getSystem().getString(R.string.load_error))
-                        }
-                    )
-//                    retMap["description"] = response.body()?.run {
-//                        select("meta[property=og:description]")?.attr("content")
-//                    } ?: Resources.getSystem().getString(R.string.load_error)
-//                    retMap["image"] = response.body()?.run {
-//                        select("meta[property=og:image]")?.attr("content")
-//                    } ?: Resources.getSystem().getString(R.string.load_error)
-                }
-            }
-        })
-
-        return retMap
-    }
+//    // Todo : 라이브데이터 리턴
+//    fun getHeaders(link: String): MutableLiveData<HashMap<String, String>> {
+//        Log.e(Tag, "getHeaders.link = $link")
+//
+//        htmlParseAPI = RetrofitService.buildHtmlService(link, APIInterface::class.java)
+//        val retMap = MutableLiveData<HashMap<String, String>>()
+//        htmlParseAPI.getHeaders(link).enqueue(object : Callback<Document> {
+//            override fun onFailure(call: Call<Document>, t: Throwable) {
+//                Log.e(Tag, "getDetailItem - onFailure - $t")
+//            }
+//
+//            override fun onResponse(call: Call<Document>, response: Response<Document>) {
+//                if (response.isSuccessful) {
+//                    retMap.postValue(
+//                        HashMap<String, String>().apply {
+//                            put(
+//                                "description",
+//                                response.body()?.select("meta[property=og:description]")
+//                                    ?.attr("content")
+//                                    ?: Resources.getSystem().getString(R.string.load_error)
+//                            )
+//                            put(
+//                                "image",
+//                                response.body()?.select("meta[property=og:image]")?.attr("content")
+//                                    ?: Resources.getSystem().getString(R.string.load_error)
+//                            )
+//                        }
+//                    )
+////                    retMap["description"] = response.body()?.run {
+////                        select("meta[property=og:description]")?.attr("content")
+////                    } ?: Resources.getSystem().getString(R.string.load_error)
+////                    retMap["image"] = response.body()?.run {
+////                        select("meta[property=og:image]")?.attr("content")
+////                    } ?: Resources.getSystem().getString(R.string.load_error)
+//                }
+//            }
+//        })
+//
+//        return retMap
+//    }
 
     fun getDetailItem(feed: RssFeed): Observable<List<Any>> {
-        for (item in feed.channel.item) {
-            htmlParseAPI = RetrofitService.buildHtmlService(item.link, APIInterface::class.java)
-            observableList.add(getApiObservable(api = htmlParseAPI, item = item))
+        for (i in 0..1) {
+            observableList.add(
+                getApiObservable(
+                    api = RetrofitService.buildHtmlService(
+                        feed.channel.item[i].link,
+                        APIInterface::class.java
+                    ), item = feed.channel.item[i]
+                )
+            )
         }
-        return combineObservables(observableList = observableList).apply {
-            subscribeOn(Schedulers.io())
-            observeOn(AndroidSchedulers.mainThread())
-        }
+//        for (item in feed.channel.item) {
+//            observableList.add(
+//                getApiObservable(
+//                    api = RetrofitService.buildHtmlService(
+//                        item.link,
+//                        APIInterface::class.java
+//                    ), item = item
+//                )
+//            )
+//        }
+        return combineObservables(observableList = observableList)
 //        val observable = combineObservables(observableList = observableList)
 //        observable.subscribeOn(Schedulers.io())
 //
@@ -128,14 +137,17 @@ class RssRepository {
 //                        it.onNext(response.body())
                         it.onNext(HashMap<String, String>().apply {
                             put("title", item.title)
-                            put("description",
-                                response.body()?.run {
-                                    select("meta[property=og:description]")?.attr("content")
-                                } ?: Resources.getSystem().getString(R.string.load_error))
-                            put("image",
-                                response.body()?.run {
-                                    select("meta[property=og:image]")?.attr("content")
-                                } ?: Resources.getSystem().getString(R.string.load_error))
+                            put(
+                                "description",
+                                response.body()?.select("meta[property=og:description]")
+                                    ?.attr("content")
+                                    ?: Resources.getSystem().getString(R.string.load_error)
+                            )
+                            put(
+                                "image",
+                                response.body()?.select("meta[property=og:image]")?.attr("content")
+                                    ?: Resources.getSystem().getString(R.string.load_error)
+                            )
                         })
                         it.onComplete()
                     }
@@ -156,5 +168,9 @@ class RssRepository {
             }
             mapList
         }
+    }
+
+    fun getDetailItems() {
+
     }
 }

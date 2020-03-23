@@ -1,6 +1,8 @@
 package com.example.rssnewsreader.view.activity
 
+import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -23,6 +25,7 @@ class NewsListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        Log.e(Tag, "$Tag onCreate!")
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
         newsListViewModel = NewsListViewModel()
 
@@ -33,15 +36,17 @@ class NewsListActivity : AppCompatActivity() {
             adapter = this@NewsListActivity.adapter
         }
 
-        newsListViewModel.getRssRepository().observe(this,
+        newsListViewModel.rssFeedLiveData.observe(this,
             Observer {
-                it ?: return@Observer
+                Log.e(Tag, "newsListViewModel - rssFeedLiveData")
+//                it ?: return@Observer
                 newsListViewModel.getDetailItems(it)
             })
 
         newsListViewModel.detailItemLiveData.observe(this,
             Observer {
-                it ?: return@Observer
+                Log.e(Tag, "newsListViewModel detailItemLiveData")
+//                it ?: return@Observer
                 adapter.submitList(it)
             })
     }

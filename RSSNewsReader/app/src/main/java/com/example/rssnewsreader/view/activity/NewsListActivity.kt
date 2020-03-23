@@ -1,7 +1,6 @@
 package com.example.rssnewsreader.view.activity
 
 import android.os.Bundle
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -9,7 +8,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
-import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.view.adapter.NewsListAdapter
 
@@ -26,9 +24,7 @@ class NewsListActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
-        newsListViewModel =
-            ViewModelProvider.AndroidViewModelFactory(application)
-                .create(NewsListViewModel::class.java)
+        newsListViewModel = NewsListViewModel()
 
         adapter = NewsListAdapter()
         binding.listRecycler.apply {
@@ -37,69 +33,17 @@ class NewsListActivity : AppCompatActivity() {
             adapter = this@NewsListActivity.adapter
         }
 
-//        newsListViewModel.getRssRepository().observe(this,
-//            Observer {
-//                it ?: return@Observer
-//
-////                when (it) {
-////                    is NewsListState.ReceiveRss -> {}
-////
-////                }
-//                binding.state = it.channel.item.toString()
-//
-//                // note : it 가공한다. it에 있는 아이템마다 이미지,본문내용을 가져온 것을 map에 넣고 그것을 submitlist 한다
-//                val mapList = ArrayList<Map<String, String>>()
-//                for (item in it.channel.item)
-//                    mapList.add(newsListViewModel.getItemDetail(item))
-//                adapter.submitList(mapList)
-//            })
-
         newsListViewModel.getRssRepository().observe(this,
             Observer {
                 it ?: return@Observer
-
-                Log.e(Tag, it.toString())
-
                 newsListViewModel.getDetailItems(it)
-
-//                receiveRss(it)
-
-//                rssCall(it.channel.item) { result ->
-//                    adapter.submitList(result)
-//                }
             })
 
         newsListViewModel.detailItemLiveData.observe(this,
             Observer {
                 it ?: return@Observer
-
                 adapter.submitList(it)
             })
-
-
-//        newsListViewModel.detailItemLiveData.observe(this,
-//            Observer {
-//                Log.e(Tag, "자세한 정보 받아왔다? : ${it}")
-//                adapter.submitList(it)
-//            })
-
-//        newsListViewModel.getItemDetails().observe(this,
-//            Observer {
-//                it ?: return@Observer
-//
-//                Log.e(Tag, it.toString())
-//
-//                adapter.submitList(it)
-//            })
-
-
-    }
-
-    private fun observerData() {
-        val stateObserver = Observer<RssFeed> {
-            // null 이라면 어떠한 행동도 하지 않는다
-            it ?: return@Observer
-        }
     }
 }
 

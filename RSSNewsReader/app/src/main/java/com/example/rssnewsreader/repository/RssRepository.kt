@@ -8,6 +8,7 @@ import com.example.rssnewsreader.model.backend.APIInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
+import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
 import io.reactivex.rxjava3.core.Observable
 import io.reactivex.rxjava3.core.Observer
 import io.reactivex.rxjava3.disposables.CompositeDisposable
@@ -94,30 +95,14 @@ class RssRepository {
             htmlParseAPI = RetrofitService.buildHtmlService(item.link, APIInterface::class.java)
             observableList.add(getApiObservable(api = htmlParseAPI, item = item))
         }
-
-        val observable = combineObservables(observableList = observableList)
-        observable.subscribeOn(Schedulers.io())
-
-//        observable.subscribe(object : Observer<List<Any>> {
-//            override fun onComplete() {
-//                Log.e(Tag, "onComplete")
-//            }
+        return combineObservables(observableList = observableList).apply {
+            subscribeOn(Schedulers.io())
+            observeOn(AndroidSchedulers.mainThread())
+        }
+//        val observable = combineObservables(observableList = observableList)
+//        observable.subscribeOn(Schedulers.io())
 //
-//            override fun onSubscribe(d: Disposable?) {
-//                compositeDisposable.add(d)
-//            }
-//
-//            override fun onNext(t: List<Any>?) {
-//                Log.e(Tag, "observable : ${t.toString()}")
-//            }
-//
-//            override fun onError(e: Throwable?) {
-//                // Todo 다시 시도할 수 있는 방법이 있는지 확인 ?????
-//                //  java.lang.ClassCastException: org.jsoup.nodes.Document cannot be cast to java.lang.String
-//                Log.e(Tag, "가져오는데 실패함 /// $e")
-//            }
-//        })
-        return observable
+//        return observable
     }
 
     /**

@@ -33,9 +33,9 @@ class NewsListAdapter : ListAdapter<HashMap<String, String>, NewsListViewHolder>
             bindTo(getItem(position))
 //            Log.e(Tag, getItem(position).toString())
         }
+
+
     }
-
-
 }
 
 private val diffCallback = object : DiffUtil.ItemCallback<HashMap<String, String>>() {

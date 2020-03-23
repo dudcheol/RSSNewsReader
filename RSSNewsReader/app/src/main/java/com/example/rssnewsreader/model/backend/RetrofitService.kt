@@ -11,14 +11,15 @@ class RetrofitService {
     companion object {
         const val Tag = "RetrofitService"
 
-        val interceptor = HttpLoggingInterceptor()
-            .run { setLevel(HttpLoggingInterceptor.Level.BODY) }
-        val client = OkHttpClient.Builder()
-            .addInterceptor(interceptor).build()
+        //Todo : HttpLoggingInterceptor 꼭 필요한지 확인
+//        val interceptor = HttpLoggingInterceptor()
+//            .run { setLevel(HttpLoggingInterceptor.Level.BODY) }
+//        val client = OkHttpClient.Builder()
+//            .addInterceptor(interceptor).build()
         val rssRetrofit = Retrofit.Builder()
             .baseUrl("https://news.google.com/rss/")
             .addConverterFactory(SimpleXmlConverterFactory.create())
-            .client(client)
+//            .client(client)
             .build()
 
         fun createService(serviceClass: Class<APIInterface>) = rssRetrofit.create(serviceClass)
@@ -28,7 +29,7 @@ class RetrofitService {
             return Retrofit.Builder()
                 .baseUrl("https://news.google.com/rss/")
                 .addConverterFactory(JsoupConverterFactory)
-                .client(client)
+//                .client(client)
                 .build()
                 .create(serviceClass)
         }

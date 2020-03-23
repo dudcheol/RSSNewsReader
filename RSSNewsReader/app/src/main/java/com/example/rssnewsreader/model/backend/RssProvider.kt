@@ -41,7 +41,7 @@ class RssProvider : Callback<RssFeed> {
     override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
         if (response.isSuccessful) {
             val rssFeed = response.body()
-            Log.e(LOG, rssFeed.toString())
+//            Log.e(LOG, rssFeed.toString())
         } else {
             Log.e(LOG, response.errorBody().toString())
         }

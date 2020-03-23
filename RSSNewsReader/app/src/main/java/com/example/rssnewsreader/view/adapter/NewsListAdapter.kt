@@ -11,7 +11,7 @@ import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistItemBinding
 
-class NewsListAdapter : ListAdapter<Map<String, String>, NewsListViewHolder>(diffCallback) {
+class NewsListAdapter : ListAdapter<HashMap<String, String>, NewsListViewHolder>(diffCallback) {
 
     companion object {
         const val Tag = "NewsListAdapter"
@@ -38,11 +38,11 @@ class NewsListAdapter : ListAdapter<Map<String, String>, NewsListViewHolder>(dif
 
 }
 
-private val diffCallback = object : DiffUtil.ItemCallback<Map<String, String>>() {
-    override fun areItemsTheSame(oldItem: Map<String, String>, newItem: Map<String, String>): Boolean =
+private val diffCallback = object : DiffUtil.ItemCallback<HashMap<String, String>>() {
+    override fun areItemsTheSame(oldItem: HashMap<String, String>, newItem: HashMap<String, String>): Boolean =
         oldItem == newItem
 
-    override fun areContentsTheSame(oldItem: Map<String, String>, newItem: Map<String, String>): Boolean =
+    override fun areContentsTheSame(oldItem: HashMap<String, String>, newItem: HashMap<String, String>): Boolean =
         oldItem == newItem
 }
 
@@ -51,6 +51,7 @@ class NewsListViewHolder(private val binding: NewslistItemBinding) : RecyclerVie
 ) {
     fun bindTo(item: Any) {
         (item as HashMap<String, String>).let {
+            Log.e("NewsListAdapter", it.toString())
             binding.listItemTitle.text = it["title"]
             binding.listItemContent.text = it["description"]
             binding.listItemKeyword.text = it["keyword"]

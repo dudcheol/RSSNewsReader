@@ -30,72 +30,9 @@ class RssRepository {
         fun getInstance() = rssRepository
     }
 
-
-    // note : Observable하게 변경하는 작업중..
-//    fun getRssFeed(): MutableLiveData<RssFeed> {
-//        val rssData = MutableLiveData<RssFeed>()
-//
-//        RetrofitService.createService(APIInterface::class.java).getFeed()
-//            .enqueue(object : Callback<RssFeed> {
-//                override fun onFailure(call: Call<RssFeed>, t: Throwable) {
-//                    Log.e(Tag, "getFeed - onFailure - $t")
-//                    call.clone()// Todo : 처리필요함 (timeout시 재시도)
-//                }
-//
-//                override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
-//                    if (response.isSuccessful) {
-//                        rssData.postValue(response.body())
-//                    }
-//                }
-//            })
-//        return rssData
-//    }
-
     fun getRssFeed(): Single<RssFeed> {
         return RetrofitService.rssService(RssInterFace::class.java).getRss()
     }
-
-//    // Todo : 라이브데이터 리턴
-//    fun getHeaders(link: String): MutableLiveData<HashMap<String, String>> {
-//        Log.e(Tag, "getHeaders.link = $link")
-//
-//        htmlParseAPI = RetrofitService.buildHtmlService(link, APIInterface::class.java)
-//        val retMap = MutableLiveData<HashMap<String, String>>()
-//        htmlParseAPI.getHeaders(link).enqueue(object : Callback<Document> {
-//            override fun onFailure(call: Call<Document>, t: Throwable) {
-//                Log.e(Tag, "getDetailItem - onFailure - $t")
-//            }
-//
-//            override fun onResponse(call: Call<Document>, response: Response<Document>) {
-//                if (response.isSuccessful) {
-//                    retMap.postValue(
-//                        HashMap<String, String>().apply {
-//                            put(
-//                                "description",
-//                                response.body()?.select("meta[property=og:description]")
-//                                    ?.attr("content")
-//                                    ?: Resources.getSystem().getString(R.string.load_error)
-//                            )
-//                            put(
-//                                "image",
-//                                response.body()?.select("meta[property=og:image]")?.attr("content")
-//                                    ?: Resources.getSystem().getString(R.string.load_error)
-//                            )
-//                        }
-//                    )
-////                    retMap["description"] = response.body()?.run {
-////                        select("meta[property=og:description]")?.attr("content")
-////                    } ?: Resources.getSystem().getString(R.string.load_error)
-////                    retMap["image"] = response.body()?.run {
-////                        select("meta[property=og:image]")?.attr("content")
-////                    } ?: Resources.getSystem().getString(R.string.load_error)
-//                }
-//            }
-//        })
-//
-//        return retMap
-//    }
-
 
     fun getDetailItem(feed: RssFeed): Observable<List<Any>> {
         observableList.clear() // note 여길 초기화하고 진행한다면?
@@ -109,21 +46,7 @@ class RssRepository {
                 )
             )
         }
-//        for (item in feed.channel.item) {
-//            observableList.add(
-//                getApiObservable(
-//                    api = RetrofitService.buildHtmlService(
-//                        item.link,
-//                        APIInterface::class.java
-//                    ), item = item
-//                )
-//            )
-//        }
         return combineObservables(observableList = observableList)
-//        val observable = combineObservables(observableList = observableList)
-//        observable.subscribeOn(Schedulers.io())
-//
-//        return observable
     }
 
     /**
@@ -180,9 +103,5 @@ class RssRepository {
             }
             mapList
         }
-    }
-
-    fun getDetailItems() {
-
     }
 }

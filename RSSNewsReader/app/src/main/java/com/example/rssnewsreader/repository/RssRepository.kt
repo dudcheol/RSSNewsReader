@@ -7,9 +7,11 @@ import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.backend.APIInterface
 import com.example.rssnewsreader.model.backend.DocumentInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
+import com.example.rssnewsreader.model.backend.RssInterFace
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
-import io.reactivex.rxjava3.core.Observable
+import io.reactivex.Observable
+import io.reactivex.Single
 import org.jsoup.nodes.Document
 import retrofit2.Call
 import retrofit2.Callback
@@ -28,23 +30,29 @@ class RssRepository {
         fun getInstance() = rssRepository
     }
 
-    fun getRssFeed(): MutableLiveData<RssFeed> {
-        val rssData = MutableLiveData<RssFeed>()
 
-        RetrofitService.createService(APIInterface::class.java).getFeed()
-            .enqueue(object : Callback<RssFeed> {
-                override fun onFailure(call: Call<RssFeed>, t: Throwable) {
-                    Log.e(Tag, "getFeed - onFailure - $t")
-                    call.clone()// Todo : 처리필요함 (timeout시 재시도)
-                }
+    // note : Observable하게 변경하는 작업중..
+//    fun getRssFeed(): MutableLiveData<RssFeed> {
+//        val rssData = MutableLiveData<RssFeed>()
+//
+//        RetrofitService.createService(APIInterface::class.java).getFeed()
+//            .enqueue(object : Callback<RssFeed> {
+//                override fun onFailure(call: Call<RssFeed>, t: Throwable) {
+//                    Log.e(Tag, "getFeed - onFailure - $t")
+//                    call.clone()// Todo : 처리필요함 (timeout시 재시도)
+//                }
+//
+//                override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
+//                    if (response.isSuccessful) {
+//                        rssData.postValue(response.body())
+//                    }
+//                }
+//            })
+//        return rssData
+//    }
 
-                override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
-                    if (response.isSuccessful) {
-                        rssData.postValue(response.body())
-                    }
-                }
-            })
-        return rssData
+    fun getRssFeed(): Single<RssFeed> {
+        return RetrofitService.rssService(RssInterFace::class.java).getRss()
     }
 
 //    // Todo : 라이브데이터 리턴
@@ -87,6 +95,7 @@ class RssRepository {
 //
 //        return retMap
 //    }
+
 
     fun getDetailItem(feed: RssFeed): Observable<List<Any>> {
         observableList.clear() // note 여길 초기화하고 진행한다면?

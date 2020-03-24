@@ -36,13 +36,15 @@ class NewsListActivity : AppCompatActivity() {
             adapter = this@NewsListActivity.adapter
         }
 
-        newsListViewModel.rssFeedLiveData.observe(this,
-            Observer {
-                Log.e(Tag, "newsListViewModel - rssFeedLiveData : feed content ${it}")
-                // note 여기는 정상
-//                it ?: return@Observer
-                newsListViewModel.getDetailItems(it)
-            })
+//        newsListViewModel.rssFeedLiveData.observe(this,
+//            Observer {
+//                Log.e(Tag, "newsListViewModel - rssFeedLiveData : feed content ${it}")
+//                // note 여기는 정상
+////                it ?: return@Observer
+//                newsListViewModel.getDetailItems(it)
+//            })
+
+        newsListViewModel.getRssFeed()
 
         newsListViewModel.detailItemLiveData.observe(this,
             Observer {

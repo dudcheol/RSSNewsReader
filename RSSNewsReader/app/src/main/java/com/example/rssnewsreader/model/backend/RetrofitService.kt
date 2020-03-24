@@ -1,10 +1,7 @@
 package com.example.rssnewsreader.model.backend
 
-import android.util.Log
-import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
-import retrofit2.converter.scalars.ScalarsConverterFactory
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.simplexml.SimpleXmlConverterFactory
 
 class RetrofitService {
@@ -16,17 +13,28 @@ class RetrofitService {
 //            .run { setLevel(HttpLoggingInterceptor.Level.BODY) }
 //        val client = OkHttpClient.Builder()
 //            .addInterceptor(interceptor).build()
-        val rssRetrofit = Retrofit.Builder()
-            .baseUrl("https://news.google.com/rss/")
-            .addConverterFactory(SimpleXmlConverterFactory.create())
-//            .client(client)
-            .build()
 
-        fun createService(serviceClass: Class<APIInterface>) = rssRetrofit.create(serviceClass)
+//        val rssRetrofit = Retrofit.Builder()
+//            .baseUrl("https://news.google.com/rss/")
+//            .addConverterFactory(SimpleXmlConverterFactory.create())
+////            .client(client)
+//            .build()
+//
+//        fun createService(serviceClass: Class<APIInterface>) = rssRetrofit.create(serviceClass)
 
-        fun createService(serviceClass: Class<DocumentInterface>) = rssRetrofit.create(serviceClass)
+        fun rssService(serviceClass: Class<RssInterFace>): RssInterFace {
+            return Retrofit.Builder()
+                .baseUrl("https://news.google.com/rss/")
+                .addConverterFactory(SimpleXmlConverterFactory.create())
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
+                .build()
+                .create(serviceClass)
+        }
 
-        fun buildHtmlService(link: String, serviceClass: Class<DocumentInterface>): DocumentInterface {
+        fun buildHtmlService(
+            link: String,
+            serviceClass: Class<DocumentInterface>
+        ): DocumentInterface {
             return Retrofit.Builder()
                 .baseUrl("https://news.google.com/rss/")
                 .addConverterFactory(JsoupConverterFactory)

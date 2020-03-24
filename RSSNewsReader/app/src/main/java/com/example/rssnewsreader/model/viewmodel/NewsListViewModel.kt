@@ -7,11 +7,11 @@ import androidx.lifecycle.ViewModel
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.repository.RssRepository
 import com.example.rssnewsreader.util.SingleLiveEvent
-import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
-import io.reactivex.rxjava3.core.Observer
-import io.reactivex.rxjava3.disposables.CompositeDisposable
-import io.reactivex.rxjava3.disposables.Disposable
-import io.reactivex.rxjava3.schedulers.Schedulers
+import io.reactivex.Observer
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.disposables.Disposable
+import io.reactivex.schedulers.Schedulers
 
 class NewsListViewModel : ViewModel() {
     private val __singleLiveEvent = SingleLiveEvent<Any>()
@@ -20,9 +20,9 @@ class NewsListViewModel : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
 
-    val rssFeedLiveData = RssRepository.getInstance().getRssFeed()
-//    val rssFeedLiveData:LiveData<RssFeed>
-////        get() = _rssFeedLiveData
+    private val _rssFeedLiveData = MutableLiveData<RssFeed>()
+    val rssFeedLiveData: LiveData<RssFeed>
+        get() = _rssFeedLiveData
 
     //    var detailItemLiveData: MutableLiveData<ArrayList<HashMap<String, String>>> = MutableLiveData()
     private val _detailItemLiveData = MutableLiveData<List<HashMap<String, String>>>()
@@ -64,6 +64,21 @@ class NewsListViewModel : ViewModel() {
 //            })
 //        }
 
+    fun getRssFeed() {
+        RssRepository.getInstance().getRssFeed()
+            .subscribeOn(Schedulers.io())
+//            .observeOn(AndroidSchedulers.)
+            .subscribe({
+                // note : success
+                it.run {
+                    if (channel.item.isNotEmpty())
+                        getDetailItems(this)
+                }
+            }, {
+                // note : error
+            })
+    }
+
     fun getDetailItems(feed: RssFeed) {
         // Todo : 전부 다 전달받은 후에 리턴하지말고 그때그때 받아온 데이터를 리턴하자
         val observable = RssRepository.getInstance().getDetailItem(feed)
@@ -75,11 +90,11 @@ class NewsListViewModel : ViewModel() {
                     Log.e(Tag, "getDetailItems - observable - onComplete")
                 }
 
-                override fun onSubscribe(d: Disposable?) {
+                override fun onSubscribe(d: Disposable) {
                     compositeDisposable.add(d)
                 }
 
-                override fun onNext(t: List<Any>?) {
+                override fun onNext(t: List<Any>) {
 //                    val castedValue = t?.filterIsInstance<HashMap<String, String>>().apply {
                     // note 여기서 t에 중복 들어와있음
                     Log.e(
@@ -89,7 +104,7 @@ class NewsListViewModel : ViewModel() {
                     _detailItemLiveData.postValue(t as List<HashMap<String, String>>)
                 }
 
-                override fun onError(e: Throwable?) {
+                override fun onError(e: Throwable) {
                     Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }
             }

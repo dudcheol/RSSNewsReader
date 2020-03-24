@@ -38,6 +38,7 @@ class RetrofitService {
             return Retrofit.Builder()
                 .baseUrl("https://news.google.com/rss/")
                 .addConverterFactory(JsoupConverterFactory)
+                .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
 //                .client(client)
                 .build()
                 .create(serviceClass)

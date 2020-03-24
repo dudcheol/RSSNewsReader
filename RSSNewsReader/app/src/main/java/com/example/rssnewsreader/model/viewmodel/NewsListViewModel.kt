@@ -5,6 +5,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.example.rssnewsreader.model.datamodel.RssFeed
+import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.repository.RssRepository
 import com.example.rssnewsreader.util.SingleLiveEvent
 import io.reactivex.Observer
@@ -29,8 +30,13 @@ class NewsListViewModel : ViewModel() {
     val detailItemLiveData: LiveData<List<HashMap<String, String>>>
         get() = _detailItemLiveData
 
+    val rssFeedCnt = MutableLiveData<Int>()
+    private var currentFeedpos = 0
+    private lateinit var rssFeedList: List<RssItem>
+
     companion object {
         const val Tag = "NewsListViewModel"
+        const val THE_NUMBER_WANT_TO_ADD = 10
     }
 
     fun getRssFeed() {
@@ -39,18 +45,48 @@ class NewsListViewModel : ViewModel() {
 //            .observeOn(AndroidSchedulers.)
             .subscribe({
                 // note : success
+                rssFeedList = it.channel.item
+                Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
+//                rssFeedCnt.postValue(rssFeedList.size)
+                currentFeedpos = THE_NUMBER_WANT_TO_ADD
                 it.run {
                     if (channel.item.isNotEmpty())
-                        getDetailItems(this)
+                        getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedpos))
                 }
             }, {
                 // note : error
             }).also { compositeDisposable.add(it) }
     }
 
-    fun getDetailItems(feed: RssFeed) {
+    fun loadMoreRssFeed() {
+//        rssFeedCnt.postValue(currentFeedpos + THE_NUMBER_WANT_TO_ADD)
+        val nextFeedPos = currentFeedpos + THE_NUMBER_WANT_TO_ADD
+        getDetailItems(
+            createLoadRssItemList(
+                rssFeedList,
+                currentFeedpos,
+                nextFeedPos
+            )
+        )
+        currentFeedpos = nextFeedPos
+    }
+
+    // start~end 까지의 item이 담긴 리스트 생성
+    fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> {
+        Log.e(Tag, "createLoadRssItemList가 전달받은 items = $items")
+        return if (end > items.lastIndex) {
+            if (start > items.lastIndex) {
+                listOf()
+            } else items.subList(start, items.lastIndex+1)
+        } else {
+            items.subList(start, end)
+        }
+    }
+
+    fun getDetailItems(items: List<RssItem>) {
         // Todo : 전부 다 전달받은 후에 리턴하지말고 그때그때 받아온 데이터를 리턴하자
-        val observable = RssRepository.getInstance().getDetailItem(feed)
+        if (items.isNullOrEmpty()) return
+        val observable = RssRepository.getInstance().getDetailItem(items)
         observable
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

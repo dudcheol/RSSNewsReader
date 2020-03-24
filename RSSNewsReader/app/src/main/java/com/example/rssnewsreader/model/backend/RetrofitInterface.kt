@@ -12,9 +12,14 @@ interface APIInterface {
     fun getFeed(): Call<RssFeed>
 }
 
+//interface DocumentInterface {
+//    @GET
+//    fun getDocument(@Url link: String): Call<Document>
+//}
+
 interface DocumentInterface {
     @GET
-    fun getDocument(@Url link: String): Call<Document>
+    fun getDocument(@Url link: String): Single<Document>
 }
 
 interface RssInterFace {

@@ -1,5 +1,6 @@
 package com.example.rssnewsreader.view.adapter
 
+import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -11,8 +12,8 @@ import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistItemBinding
 
-class NewsListAdapter : ListAdapter<HashMap<String, String>, NewsListViewHolder>(diffCallback) {
-
+class NewsListAdapter :
+    ListAdapter<HashMap<String, String>, NewsListViewHolder>(diffCallback) {
     companion object {
         const val Tag = "NewsListAdapter"
     }
@@ -33,9 +34,9 @@ class NewsListAdapter : ListAdapter<HashMap<String, String>, NewsListViewHolder>
             bindTo(getItem(position))
 //            Log.e(Tag, getItem(position).toString())
         }
-
-
     }
+
+
 }
 
 private val diffCallback = object : DiffUtil.ItemCallback<HashMap<String, String>>() {
@@ -64,5 +65,9 @@ class NewsListViewHolder(private val binding: NewslistItemBinding) : RecyclerVie
             .load(item["image"])
             .placeholder(R.drawable.ic_launcher_background)
             .into(binding.listItemImage)
+
+        binding.listItem.setOnClickListener {
+            Log.e(NewsListAdapter.Tag, "리스트 아이템 클릭 이벤트 ! : $item")
+        }
     }
 }

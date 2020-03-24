@@ -76,7 +76,7 @@ class NewsListViewModel : ViewModel() {
                 }
             }, {
                 // note : error
-            })
+            }).also { compositeDisposable.add(it) }
     }
 
     fun getDetailItems(feed: RssFeed) {

@@ -23,6 +23,7 @@ class NewsListActivity : AppCompatActivity() {
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
             Log.e(Tag, "onLoadMore!!!")
+            adapter.setProgressMore(true)
             newsListViewModel.loadMoreRssFeed()
         }
     }
@@ -65,11 +66,18 @@ class NewsListActivity : AppCompatActivity() {
                     isInit = true
                 } else {
                     adapter.run {
+                        setProgressMore(false)
                         addItemMore(it)
                         setMoreLoading(false)
                     }
                 }
             })
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        newsListViewModel.clearDisposable()
+
     }
 }
 

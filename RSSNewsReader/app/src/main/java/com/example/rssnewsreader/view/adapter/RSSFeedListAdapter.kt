@@ -6,12 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
+
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     constructor(
@@ -43,6 +45,8 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val Tag = "RSSFeedListAdapter"
+        private const val VIEW_ITEM = 1;
+        private const val VIEW_PROG = 0;
     }
 
     public interface OnLoadMoreListener {
@@ -68,10 +72,18 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         })
     }
 
+    override fun getItemViewType(position: Int): Int {
+        return if (items[position] != null) VIEW_ITEM else VIEW_PROG
+    }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
-        var view = LayoutInflater.from(context).inflate(R.layout.newslist_item, parent, false)
-        return Holder(view)
+        return if (viewType == VIEW_ITEM) {
+            Holder(LayoutInflater.from(context).inflate(R.layout.newslist_item, parent, false))
+        } else {
+            ProgressViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.newslist_item_progress, parent, false)
+            )
+        }
     }
 
 
@@ -90,7 +102,18 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        (holder as Holder).bind(items[position]!!, context)
+        if (holder is Holder)
+            holder.bind(items[position], context)
+    }
+
+    fun setProgressMore(isProgress: Boolean) {
+        if (isProgress) {
+            items.add(null)
+            notifyItemInserted(items.size - 1)
+        } else {
+            items.removeAt(items.size - 1)
+            notifyItemRemoved(items.size)
+        }
     }
 
     inner class Holder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
@@ -99,29 +122,24 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val content = itemView?.findViewById<TextView>(R.id.list_item_content)
         val image = itemView?.findViewById<ImageView>(R.id.list_item_image)
 
-        fun bind(item: HashMap<String, String>, context: Context) {
-            title?.text = item["title"]
-            content?.text = item["description"]
+        fun bind(item: HashMap<String, String>?, context: Context) {
+            title?.text = item?.get("title")
+            content?.text = item?.get("description")
 
             Glide.with(context)
-                .load(item["image"])
+                .load(item?.get("image"))
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(image!!)
-//            Glide.with(context).load(product.thumbnailImage)
-//                .override(172, 172).centerCrop().into(image!!)
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP){
-//                val drawable = context.getDrawable(R.drawable.round_background_imageview) as GradientDrawable
-//                image.background = drawable
-//                image.clipToOutline = true
-//            }
-//            else {
-//                //TODO("VERSION.SDK_INT < LOLLIPOP")
-//            }
+
             itemView.setOnClickListener {
                 //nextPage
 //                adapterClickListener.setOnClickListener(product.id)
                 Log.e(Tag, "itemView clicked!")
             }
         }
+    }
+
+    inner class ProgressViewHolder(v: View) : ViewHolder(v) {
+
     }
 }

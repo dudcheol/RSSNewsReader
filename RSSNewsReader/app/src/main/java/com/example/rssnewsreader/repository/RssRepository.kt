@@ -33,7 +33,7 @@ class RssRepository {
         rssParseAPI.getFeed().enqueue(object : Callback<RssFeed> {
             override fun onFailure(call: Call<RssFeed>, t: Throwable) {
                 Log.e(Tag, "getFeed - onFailure - $t")
-                getRssFeed() // Todo : 처리필요함
+                call.clone()// Todo : 처리필요함 (timeout시 재시도)
             }
 
             override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {

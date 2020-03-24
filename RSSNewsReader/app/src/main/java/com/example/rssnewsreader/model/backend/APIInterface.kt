@@ -10,10 +10,9 @@ import retrofit2.http.Url
 interface APIInterface {
     @GET("rss?hl=ko&gl=KR&ceid=KR:ko")
     fun getFeed(): Call<RssFeed>
+}
 
+interface DocumentInterface {
     @GET
-    fun getHeaders(@Url link: String): Call<Document>
-
-    @GET
-    fun getDetailItem(@Url link: String): Single<Document>
+    fun getDocument(@Url link: String): Call<Document>
 }

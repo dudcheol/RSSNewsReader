@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.lifecycle.MutableLiveData
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.backend.APIInterface
+import com.example.rssnewsreader.model.backend.DocumentInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
@@ -15,7 +16,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class RssRepository {
-    private val rssParseAPI: APIInterface = RetrofitService.createService(APIInterface::class.java)
+//    private val feedAPI: APIInterface = RetrofitService.createService(APIInterface::class.java)
 
     //    lateinit var htmlParseAPI: APIInterface
     private val observableList = ArrayList<Observable<Any>>()
@@ -30,18 +31,19 @@ class RssRepository {
     fun getRssFeed(): MutableLiveData<RssFeed> {
         val rssData = MutableLiveData<RssFeed>()
 
-        rssParseAPI.getFeed().enqueue(object : Callback<RssFeed> {
-            override fun onFailure(call: Call<RssFeed>, t: Throwable) {
-                Log.e(Tag, "getFeed - onFailure - $t")
-                call.clone()// Todo : 처리필요함 (timeout시 재시도)
-            }
-
-            override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
-                if (response.isSuccessful) {
-                    rssData.postValue(response.body())
+        RetrofitService.createService(APIInterface::class.java).getFeed()
+            .enqueue(object : Callback<RssFeed> {
+                override fun onFailure(call: Call<RssFeed>, t: Throwable) {
+                    Log.e(Tag, "getFeed - onFailure - $t")
+                    call.clone()// Todo : 처리필요함 (timeout시 재시도)
                 }
-            }
-        })
+
+                override fun onResponse(call: Call<RssFeed>, response: Response<RssFeed>) {
+                    if (response.isSuccessful) {
+                        rssData.postValue(response.body())
+                    }
+                }
+            })
         return rssData
     }
 
@@ -93,7 +95,7 @@ class RssRepository {
                 getApiObservable(
                     api = RetrofitService.buildHtmlService(
                         item.link,
-                        APIInterface::class.java
+                        DocumentInterface::class.java
                     ), item = item
                 )
             )
@@ -120,9 +122,9 @@ class RssRepository {
      * @param api 사용하는 retrofit api interface
      * @param link url 주소
      */
-    fun getApiObservable(api: APIInterface, item: RssItem): Observable<Any> {
+    fun getApiObservable(api: DocumentInterface, item: RssItem): Observable<Any> {
         val observable = Observable.create<Any> {
-            api.getHeaders(item.link).enqueue(object : Callback<Document> {
+            api.getDocument(item.link).enqueue(object : Callback<Document> {
                 override fun onFailure(call: Call<Document>, t: Throwable) {
                     if (!it.isDisposed) {
                         // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다

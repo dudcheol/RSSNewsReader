@@ -24,7 +24,9 @@ class RetrofitService {
 
         fun createService(serviceClass: Class<APIInterface>) = rssRetrofit.create(serviceClass)
 
-        fun buildHtmlService(link: String, serviceClass: Class<APIInterface>): APIInterface {
+        fun createService(serviceClass: Class<DocumentInterface>) = rssRetrofit.create(serviceClass)
+
+        fun buildHtmlService(link: String, serviceClass: Class<DocumentInterface>): DocumentInterface {
             return Retrofit.Builder()
                 .baseUrl("https://news.google.com/rss/")
                 .addConverterFactory(JsoupConverterFactory)

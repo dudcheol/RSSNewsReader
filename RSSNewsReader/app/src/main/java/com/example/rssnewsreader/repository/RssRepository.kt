@@ -87,13 +87,14 @@ class RssRepository {
 //    }
 
     fun getDetailItem(feed: RssFeed): Observable<List<Any>> {
-        for (i in 0..1) {
+        observableList.clear() // note 여길 초기화하고 진행한다면?
+        for (item in feed.channel.item) { // Todo : for문 순회 fee.channel.item으로 변경할 것
             observableList.add(
                 getApiObservable(
                     api = RetrofitService.buildHtmlService(
-                        feed.channel.item[i].link,
+                        item.link,
                         APIInterface::class.java
-                    ), item = feed.channel.item[i]
+                    ), item = item
                 )
             )
         }

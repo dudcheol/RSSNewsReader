@@ -81,6 +81,7 @@ class NewsListViewModel : ViewModel() {
 
                 override fun onNext(t: List<Any>?) {
 //                    val castedValue = t?.filterIsInstance<HashMap<String, String>>().apply {
+                    // note 여기서 t에 중복 들어와있음
                     Log.e(
                         Tag,
                         "getDetailItems - observable - onNext : ${(t as List<HashMap<String, String>>).toString()}"

@@ -77,6 +77,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun addItemMore(newOne: List<HashMap<String, String>>) {
         items.addAll(newOne)
+        Log.e(Tag, "addItemMore : ${items}")
         notifyItemRangeChanged(0, items.size)
     }
 
@@ -122,6 +123,5 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 Log.e(Tag, "itemView clicked!")
             }
         }
-
     }
 }

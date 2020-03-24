@@ -18,9 +18,9 @@ class NewsListActivity : AppCompatActivity() {
 
     //    private lateinit var adapter: NewsListAdapter
     private lateinit var adapter: RSSFeedListAdapter
-    private var isInit:Boolean = false
+    private var isInit: Boolean = false
 
-    private val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
+    val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
             Log.e(Tag, "onLoadMore!!!")
             newsListViewModel.loadMoreRssFeed()
@@ -46,9 +46,14 @@ class NewsListActivity : AppCompatActivity() {
                 Log.e(Tag, "newsListViewModel detailItemLiveData : it size ${it.size} , ${it}")
 //                it ?: return@Observer
 //                adapter.submitList(it)
-                if (!isInit){
+                if (!isInit) {
                     val linearLayoutManager = LinearLayoutManager(this@NewsListActivity)
-                    adapter = RSSFeedListAdapter(this, listOf(), onLoadMoreListener, linearLayoutManager).apply {
+                    adapter = RSSFeedListAdapter(
+                        this,
+                        it,
+                        onLoadMoreListener,
+                        linearLayoutManager
+                    ).apply {
                         list_recycler.run {
 //                            setHasFixedSize(true)
                             layoutManager = linearLayoutManager
@@ -57,10 +62,12 @@ class NewsListActivity : AppCompatActivity() {
                         setRecyclerView(list_recycler)
                         notifyDataSetChanged()
                     }
-                }
-                adapter.run {
-                    addItemMore(it)
-                    setMoreLoading(false)
+                    isInit = true
+                } else {
+                    adapter.run {
+                        addItemMore(it)
+                        setMoreLoading(false)
+                    }
                 }
             })
     }

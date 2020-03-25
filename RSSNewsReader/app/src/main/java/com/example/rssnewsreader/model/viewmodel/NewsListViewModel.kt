@@ -40,7 +40,7 @@ class NewsListViewModel : ViewModel() {
     fun initRssFeed(itemCnt : Int) {
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
-//            .observeOn(AndroidSchedulers.)
+            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
                 // note : success
                 rssFeedList = it.channel.item

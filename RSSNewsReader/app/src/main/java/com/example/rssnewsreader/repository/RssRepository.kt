@@ -61,13 +61,14 @@ class RssRepository {
     fun getApiObservable(api: DocumentInterface, item: RssItem): Single<Any> {
         val observable = Single.create<Any> { emitter ->
             api.getDocument(item.link)
-                //.retry(3) // Todo : 모든 상황에서 retry는 좋지못함
+//                .retry(3) // Todo : 모든 상황에서 retry는 좋지못함
                 .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe({ document ->
                     if (!emitter.isDisposed) {
 //                        Log.e(Tag, "통신 제대로 했나? /// ${document}")
 //                        it.onNext(response.body())
+                        // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
                         emitter.onSuccess(HashMap<String, String>().apply {
                             put("title", item.title)
                             put("link", item.link)
@@ -87,7 +88,15 @@ class RssRepository {
                 }, {
                     if (!emitter.isDisposed) {
                         // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
-                        emitter.onSuccess(object : HashMap<String, String>() {})
+                        Log.e(Tag, "item detail load fail...!! : $it")
+                        emitter.onSuccess(
+                            mapOf(
+                                "title" to "Unknown",
+                                "link" to "Unknown",
+                                "description" to "Unknown",
+                                "image" to "Unknown"
+                            )
+                        )
                         //e.onNext((T) new EmptyData());
 //                        emitter.onError()  // Todo 에러처리
                     }

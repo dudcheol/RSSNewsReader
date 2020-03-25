@@ -17,15 +17,20 @@ import com.example.rssnewsreader.util.dpToPx
 
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    interface AdapterClickListener {
+        fun setOnClickListener(url: String)
+    }
+
     constructor(
         context: Context,
-        items: List<HashMap<String, String>>, /*adapterClickListener: AdapterClickListener,*/
+        items: List<HashMap<String, String>>,
+        adapterClickListener: AdapterClickListener,
         onLoadMoreListener: OnLoadMoreListener,
         linearLayoutManager: LinearLayoutManager
     ) : this() {
         this.context = context
         this.items = ArrayList(items)
-//        this.adapterClickListener = adapterClickListener
+        this.adapterClickListener = adapterClickListener
         this.onLoadMoreListener = onLoadMoreListener
         this.linearLayoutManager = linearLayoutManager
     }
@@ -33,7 +38,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     lateinit var context: Context
     lateinit var items: ArrayList<HashMap<String, String>?>
 
-    //    lateinit var adapterClickListener:AdapterClickListener
+    lateinit var adapterClickListener: AdapterClickListener
     lateinit var onLoadMoreListener: OnLoadMoreListener
     lateinit var linearLayoutManager: LinearLayoutManager
 
@@ -155,7 +160,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             itemView.setOnClickListener {
                 //nextPage
-//                adapterClickListener.setOnClickListener(product.id)
+                item?.get("link")?.let { adapterClickListener.setOnClickListener(it) }
                 Log.e(Tag, "itemView clicked!")
             }
         }

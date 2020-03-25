@@ -13,6 +13,8 @@ import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
+import com.example.rssnewsreader.view.webview.BottomSheetWebView
+import kotlinx.android.synthetic.main.newslist_activity.*
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
@@ -21,6 +23,14 @@ class NewsListActivity : AppCompatActivity() {
     //    private lateinit var adapter: NewsListAdapter
     private var adapter: RSSFeedListAdapter? = null
     private var isInit: Boolean = false
+
+    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener{
+        override fun setOnClickListener(url: String) {
+            BottomSheetWebView(this@NewsListActivity).run {
+                showWithUrl(url)
+            }
+        }
+    }
 
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
@@ -85,6 +95,7 @@ class NewsListActivity : AppCompatActivity() {
         return RSSFeedListAdapter(
             this,
             items,
+            onAdapterClickListener,
             onLoadMoreListener,
             linearLayoutManager
         ).apply {

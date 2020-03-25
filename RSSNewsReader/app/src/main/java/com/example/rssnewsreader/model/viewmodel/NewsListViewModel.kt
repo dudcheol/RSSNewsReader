@@ -34,10 +34,10 @@ class NewsListViewModel : ViewModel() {
 
     companion object {
         const val Tag = "NewsListViewModel"
-        const val THE_NUMBER_WANT_TO_ADD = 10
+        const val THE_NUMBER_WANT_TO_ADD = 1 // Todo 화면사이즈를 구해서 리스트 아이템으로 나눈 값보다 약간 더크게 해보자!
     }
 
-    fun getRssFeed() {
+    fun getRssFeed(itemCnt : Int) {
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.)
@@ -46,7 +46,7 @@ class NewsListViewModel : ViewModel() {
                 rssFeedList = it.channel.item
                 Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
 //                rssFeedCnt.postValue(rssFeedList.size)
-                currentFeedpos = THE_NUMBER_WANT_TO_ADD
+                currentFeedpos = itemCnt
                 it.run {
                     if (channel.item.isNotEmpty())
                         getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedpos))

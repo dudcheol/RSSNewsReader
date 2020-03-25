@@ -1,5 +1,6 @@
 package com.example.rssnewsreader.view.activity
 
+import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
@@ -9,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
+import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import kotlinx.android.synthetic.main.newslist_activity.*
 
@@ -40,7 +42,7 @@ class NewsListActivity : AppCompatActivity() {
 
 //        adapter = NewsListAdapter()
 
-        newsListViewModel.getRssFeed()
+        newsListViewModel.getRssFeed(getOptimalItemSizeInit())
 
         newsListViewModel.detailItemLiveData.observe(this,
             Observer {
@@ -56,7 +58,8 @@ class NewsListActivity : AppCompatActivity() {
                         linearLayoutManager
                     ).apply {
                         list_recycler.run {
-//                            setHasFixedSize(true)
+                            setHasFixedSize(true)
+//                            setHasStableIds(true)
                             layoutManager = linearLayoutManager
                             adapter = this@apply
                         }
@@ -74,10 +77,17 @@ class NewsListActivity : AppCompatActivity() {
             })
     }
 
+    fun getOptimalItemSizeInit(): Int {
+        val point: Point = Point()
+//        val point2: Point = Point()
+        windowManager.defaultDisplay.getSize(point)
+//        windowManager.defaultDisplay.getRealSize(point2)
+        return (point.y / dpToPx(this, RSSFeedListAdapter.ITEM_HEIGHT_DP))
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         newsListViewModel.clearDisposable()
-
     }
 }
 

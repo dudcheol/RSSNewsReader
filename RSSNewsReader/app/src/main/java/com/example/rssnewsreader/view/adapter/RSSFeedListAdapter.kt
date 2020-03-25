@@ -6,13 +6,14 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import android.widget.ProgressBar
+import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
+import com.example.rssnewsreader.util.dpToPx
 
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -45,6 +46,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val Tag = "RSSFeedListAdapter"
+        const val ITEM_HEIGHT_DP = 130
         private const val VIEW_ITEM = 1;
         private const val VIEW_PROG = 0;
     }
@@ -62,9 +64,17 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition()
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
 
+                Log.e(
+                    Tag, "onLoadMore이 어떻게 호출되는 건가?\n" +
+                            "totalItemCount($totalItemCount) - visibleItemCount($visibleItemCount) =  ${totalItemCount - visibleItemCount}\n" +
+                            "firstVisibleItem($firstVisibleItem) + visibleThreshold${visibleThreshold} = ${firstVisibleItem + visibleThreshold}\n" +
+                            "이므로, ${(totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\n" +
+                            "onLoadMore이 작동하나? ${!isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\""
+                )
                 if (!isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+                    Log.e(Tag, "onLoadMore 작동!")
                     if (onLoadMoreListener != null) {
-                        onLoadMoreListener.onLoadMore()
+                        onLoadMoreListener.onLoadMore()     //Todo : 코틀린스럽게 바꿔보자
                     }
                     isModeLoading = true
                 }
@@ -110,19 +120,26 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         if (isProgress) {
             items.add(null)
             notifyItemInserted(items.size - 1)
+//            notifyDataSetChanged()
         } else {
             items.removeAt(items.size - 1)
             notifyItemRemoved(items.size)
+//            notifyDataSetChanged()
         }
     }
 
     inner class Holder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
         //coding your own view
+        val card = itemView?.findViewById<LinearLayout>(R.id.list_item)
         val title = itemView?.findViewById<TextView>(R.id.list_item_title)
         val content = itemView?.findViewById<TextView>(R.id.list_item_content)
         val image = itemView?.findViewById<ImageView>(R.id.list_item_image)
 
         fun bind(item: HashMap<String, String>?, context: Context) {
+            card?.layoutParams?.apply {
+                height = dpToPx(context, ITEM_HEIGHT_DP)
+            }.run { card?.layoutParams = this }
+
             title?.text = item?.get("title")
             content?.text = item?.get("description")
 

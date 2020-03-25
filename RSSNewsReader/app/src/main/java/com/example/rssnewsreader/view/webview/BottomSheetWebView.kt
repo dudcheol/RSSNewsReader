@@ -14,6 +14,10 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
     private val mBottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context)
     private var mCurrentWebViewScrollY = 0
 
+    companion object {
+        const val Tag = "BottomSheetWebView"
+    }
+
     init {
         inflateLayout(context)
         setupBottomSheetBehaviour()
@@ -40,16 +44,19 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     }
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        if (newState == BottomSheetBehavior.STATE_DRAGGING && mCurrentWebViewScrollY > 0) {
+                        if (newState == BottomSheetBehavior.STATE_DRAGGING) {
                             // this is where we check if webview can scroll up or not and based on that we let BottomSheet close on scroll down
-                            behaviour.setState(BottomSheetBehavior.STATE_EXPANDED);
+                            if (mCurrentWebViewScrollY > 0) {
+                                behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                            }
                         } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             close()
                         }
                     }
-
-
                 })
+                bottom_sheet_close_botton.setOnClickListener {
+                    behaviour.state = BottomSheetBehavior.STATE_HIDDEN
+                }
             }
         }
     }

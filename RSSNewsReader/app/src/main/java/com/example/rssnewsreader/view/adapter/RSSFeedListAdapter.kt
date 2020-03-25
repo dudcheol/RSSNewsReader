@@ -38,7 +38,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     lateinit var linearLayoutManager: LinearLayoutManager
 
     var isModeLoading = false
-    var visibleThreshold = 0
+    var isRefresing = false
     var firstVisibleItem = 0
     var visibleItemCount = 0
     var totalItemCount = 0
@@ -47,6 +47,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     companion object {
         const val Tag = "RSSFeedListAdapter"
         const val ITEM_HEIGHT_DP = 130
+        const val VISIBLE_THRESHOLD = 1
         private const val VIEW_ITEM = 1;
         private const val VIEW_PROG = 0;
     }
@@ -64,14 +65,14 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 firstVisibleItem = linearLayoutManager.findFirstVisibleItemPosition()
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
 
-                Log.e(
-                    Tag, "onLoadMore이 어떻게 호출되는 건가?\n" +
-                            "totalItemCount($totalItemCount) - visibleItemCount($visibleItemCount) =  ${totalItemCount - visibleItemCount}\n" +
-                            "firstVisibleItem($firstVisibleItem) + visibleThreshold${visibleThreshold} = ${firstVisibleItem + visibleThreshold}\n" +
-                            "이므로, ${(totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\n" +
-                            "onLoadMore이 작동하나? ${!isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\""
-                )
-                if (!isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)) {
+//                Log.e(
+//                    Tag, "onLoadMore이 어떻게 호출되는 건가?\n" +
+//                            "totalItemCount($totalItemCount) - visibleItemCount($visibleItemCount) =  ${totalItemCount - visibleItemCount}\n" +
+//                            "firstVisibleItem($firstVisibleItem) + visibleThreshold${visibleThreshold} = ${firstVisibleItem + visibleThreshold}\n" +
+//                            "이므로, ${(totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\n" +
+//                            "onLoadMore이 작동하나? ${!isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + visibleThreshold)}\""
+//                )
+                if (!isRefresing && !isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
                     Log.e(Tag, "onLoadMore 작동!")
                     if (onLoadMoreListener != null) {
                         onLoadMoreListener.onLoadMore()     //Todo : 코틀린스럽게 바꿔보자
@@ -128,6 +129,10 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
+    fun suppressLoadingRss(isRefresing: Boolean) {
+        this.isRefresing = isRefresing
+    }
+
     inner class Holder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
         //coding your own view
         val card = itemView?.findViewById<LinearLayout>(R.id.list_item)
@@ -156,7 +161,5 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    inner class ProgressViewHolder(v: View) : ViewHolder(v) {
-
-    }
+    inner class ProgressViewHolder(v: View) : ViewHolder(v) {}
 }

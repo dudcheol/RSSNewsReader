@@ -6,8 +6,6 @@ import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.backend.RssInterFace
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
-import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
-import io.reactivex.Observable
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -72,6 +70,7 @@ class RssRepository {
 //                        it.onNext(response.body())
                         emitter.onSuccess(HashMap<String, String>().apply {
                             put("title", item.title)
+                            put("link", item.link)
                             put(
                                 "description",
                                 document?.select("meta[property=og:description]")?.attr("content")

@@ -29,15 +29,15 @@ class NewsListViewModel : ViewModel() {
         get() = _detailItemLiveData
 
     val rssFeedCnt = MutableLiveData<Int>()
-    private var currentFeedpos = 0
+    private var currentFeedPos = 0
     private lateinit var rssFeedList: List<RssItem>
 
     companion object {
         const val Tag = "NewsListViewModel"
-        const val THE_NUMBER_WANT_TO_ADD = 1 // Todo 화면사이즈를 구해서 리스트 아이템으로 나눈 값보다 약간 더크게 해보자!
+        const val THE_NUMBER_WANT_TO_ADD = 2 // note 스크롤될때마다 추가되는 아이템의 갯수
     }
 
-    fun getRssFeed(itemCnt : Int) {
+    fun initRssFeed(itemCnt : Int) {
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.)
@@ -46,10 +46,10 @@ class NewsListViewModel : ViewModel() {
                 rssFeedList = it.channel.item
                 Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
 //                rssFeedCnt.postValue(rssFeedList.size)
-                currentFeedpos = itemCnt
+                currentFeedPos = itemCnt
                 it.run {
                     if (channel.item.isNotEmpty())
-                        getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedpos))
+                        getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
                 }
             }, {
                 // note : error
@@ -57,16 +57,16 @@ class NewsListViewModel : ViewModel() {
     }
 
     fun loadMoreRssFeed() {
-//        rssFeedCnt.postValue(currentFeedpos + THE_NUMBER_WANT_TO_ADD)
-        val nextFeedPos = currentFeedpos + THE_NUMBER_WANT_TO_ADD
+//        rssFeedCnt.postValue(currentFeedPos + THE_NUMBER_WANT_TO_ADD)
+        val nextFeedPos = currentFeedPos + THE_NUMBER_WANT_TO_ADD
         getDetailItems(
             createLoadRssItemList(
                 rssFeedList,
-                currentFeedpos,
+                currentFeedPos,
                 nextFeedPos
             )
         )
-        currentFeedpos = nextFeedPos
+        currentFeedPos = nextFeedPos
     }
 
     // start~end 까지의 item이 담긴 리스트 생성
@@ -125,7 +125,9 @@ class NewsListViewModel : ViewModel() {
 //            })
     }
 
-    fun createKeyword(text: String): String = "test/test/test"
+    fun createKeyword(description: String): String {
+        return description
+    }
 
     /** Todo
      * Observing을 그만두게 될 때(뷰모델이 사라질 때 == 뷰가 사라질 때) compositeDisposable을 비워줌으로서 메모리 누수를 방지하는 작업

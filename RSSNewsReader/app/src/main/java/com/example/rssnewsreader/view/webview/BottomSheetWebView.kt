@@ -26,7 +26,8 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
         mBottomSheetDialog.setContentView(this)
 
         mBottomSheetDialog.window?.findViewById<View>(com.google.android.material.R.id.design_bottom_sheet)
-            ?.setBackgroundResource(android.R.color.transparent);
+            ?.setBackgroundResource(android.R.color.transparent)
+
     }
 
     private fun setupBottomSheetBehaviour() {
@@ -46,18 +47,20 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                             close()
                         }
                     }
+
+
                 })
             }
         }
     }
 
     private fun setupWebView() {
-        webView.run {
-            onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
-                override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
-                    mCurrentWebViewScrollY = t
-                }
+        webView.onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
+            override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+                mCurrentWebViewScrollY = t
             }
+        }
+        webView.run {
             webViewClient = WebViewClient()
             settings.run {
                 javaScriptEnabled = true

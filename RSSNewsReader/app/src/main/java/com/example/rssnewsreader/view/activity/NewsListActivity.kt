@@ -26,9 +26,9 @@ class NewsListActivity : AppCompatActivity() {
     private var isInit: Boolean = false
 
     val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener{
-        override fun setOnClickListener(url: String) {
+        override fun setOnClickListener(item: RssItem) {
             BottomSheetWebView(this@NewsListActivity).run {
-                showBottomSheetWebView(url)
+                showBottomSheetWebView(item)
             }
         }
     }

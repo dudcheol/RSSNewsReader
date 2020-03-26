@@ -19,7 +19,7 @@ import com.example.rssnewsreader.util.dpToPx
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     interface AdapterClickListener {
-        fun setOnClickListener(url: String)
+        fun setOnClickListener(item: RssItem)
     }
 
     constructor(
@@ -161,7 +161,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             itemView.setOnClickListener {
                 //nextPage
-                item?.link?.let { adapterClickListener.setOnClickListener(it) }
+                item?.let { adapterClickListener.setOnClickListener(it) }
                 Log.e(Tag, "itemView clicked!")
             }
         }

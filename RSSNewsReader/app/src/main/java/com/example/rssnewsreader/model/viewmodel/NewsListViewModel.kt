@@ -11,6 +11,7 @@ import com.example.rssnewsreader.util.SingleLiveEvent
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.*
 
 class NewsListViewModel : ViewModel() {
     private val __singleLiveEvent = SingleLiveEvent<Any>()
@@ -37,7 +38,7 @@ class NewsListViewModel : ViewModel() {
         const val THE_NUMBER_WANT_TO_ADD = 2 // note 스크롤될때마다 추가되는 아이템의 갯수
     }
 
-    fun initRssFeed(itemCnt : Int) {
+    fun initRssFeed(itemCnt: Int) {
         Log.e("Track", "initRssFeed 진입")
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
@@ -124,10 +125,6 @@ class NewsListViewModel : ViewModel() {
 //                    Log.e(Tag, "getDetailItems - observable - onError : $e")
 //                }
 //            })
-    }
-
-    fun createKeyword(description: String): String {
-        return description
     }
 
     /** Todo

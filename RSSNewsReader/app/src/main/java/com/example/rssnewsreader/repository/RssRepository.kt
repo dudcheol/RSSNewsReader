@@ -9,6 +9,8 @@ import com.example.rssnewsreader.model.datamodel.RssItem
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import java.util.*
+import kotlin.collections.ArrayList
 
 class RssRepository {
 //    private val feedAPI: APIInterface = RetrofitService.createService(APIInterface::class.java)
@@ -19,6 +21,8 @@ class RssRepository {
 
     companion object {
         const val Tag = "RssRepository"
+        const val ERROR_DESCRIPTION = "불러오는 데 실패했습니다"
+        const val ERROR_KEYWORD = "키워드를 발견하지 못했습니다"
         val rssRepository: RssRepository = RssRepository()
 
         fun getInstance() = rssRepository
@@ -68,11 +72,12 @@ class RssRepository {
                         // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
                         emitter.onSuccess(item.apply {
                             description =
-                                document?.select("meta[property=og:description]")?.attr("content")
-                                    .toString()
-                            keyword = listOf()
-                            image = document?.select("meta[property=og:image]")?.attr("content")
-                                .toString()
+                                document.select("meta[property=og:description]")?.attr("content")
+                                    ?: ERROR_DESCRIPTION
+                            keyword = createKeyword(description)
+                            image =
+                                document?.select("meta[property=og:image]")?.attr("content")
+                                    ?: ERROR_DESCRIPTION
                         }
 //                            HashMap<String, String>().apply {
 //                            put("title", item.title)
@@ -96,8 +101,8 @@ class RssRepository {
                         Log.e(Tag, "item detail load fail...!! : $it")
                         emitter.onSuccess(
                             item.apply {
-                                description = "불러오는 데 실패했습니다"
-                                keyword = listOf()
+                                description = ERROR_DESCRIPTION
+                                keyword = listOf(ERROR_KEYWORD)
                                 image = " unKnown "
                             }
 //                            mapOf(
@@ -126,6 +131,47 @@ class RssRepository {
                 mapList.add(item)
             }
             mapList
+        }
+    }
+
+    /**
+     * note : "2글자 이상"의 "단어"들 중에서 등장 빈도수가 "높은 순서"대로 "3건"(단, 빈도수가 동일할 시 문자정렬 오름차순 적용)
+     */
+    fun createKeyword(description: String): List<String> {
+        if (description == ERROR_DESCRIPTION) return listOf(ERROR_KEYWORD)
+        val regex = Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]")
+        val st = StringTokenizer(description)
+        val map = HashMap<String, Int>()
+        while (st.hasMoreTokens()) {
+            val token = regex.replace(st.nextToken(), "")
+            if (token.length < 2 || token.isEmpty() || token.isBlank()) continue
+            if (map.containsKey(token)) {
+                map[token] = map[token]!! + 1
+            } else {
+                map[token] = 1
+            }
+        }
+
+        Log.e(Tag, "keyword description = $description")
+        Log.e(Tag, "keyword map = $map")
+
+        if (map.isEmpty()) return listOf(ERROR_KEYWORD)
+
+        val res = map.toList()
+        if (res.size != 1)
+            Collections.sort(res, kotlin.Comparator { o1, o2 ->
+                if (o1.second == o2.second) o1.first.compareTo(o2.first)
+                else -o1.second.compareTo(o2.second)
+            })
+
+        Log.e(Tag, "keyword sorted = $res")
+
+        // Todo 문제있음. res 0,1,2 가 보장되지않음
+        return arrayListOf<String>().apply {
+            for (i in res.indices) {
+                if (i >= 3) break
+                add(i, res[i].first)
+            }
         }
     }
 

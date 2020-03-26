@@ -60,7 +60,7 @@ class NewsListViewHolder(private val binding: NewslistItemBinding) : RecyclerVie
         Log.e("NewsListAdapter", item.toString())
         binding.listItemTitle.text = item["title"]
         binding.listItemContent.text = item["description"]
-        binding.listItemKeyword.text = item["keyword"]
+//        binding.listItemKeyword.text = item["keyword"]
         Glide.with(binding.root)
             .load(item["image"])
             .placeholder(R.drawable.ic_launcher_background)

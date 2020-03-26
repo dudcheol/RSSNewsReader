@@ -14,7 +14,7 @@ data class RssItem(
 ) {
     var description: String = "-"
     var image: String = "-"
-    var keyword: List<String> = listOf()
+    var keyword: List<String> = listOf("", "", "")
 
     override fun toString(): String =
         "RssItem [title=${title}, link=${link}, description=$description, keyword=$keyword]"

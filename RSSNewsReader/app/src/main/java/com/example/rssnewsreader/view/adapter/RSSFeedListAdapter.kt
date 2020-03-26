@@ -15,6 +15,10 @@ import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.util.dpToPx
+import com.google.android.material.chip.Chip
+import com.google.android.material.chip.ChipDrawable
+import com.google.android.material.chip.ChipGroup
+import kotlinx.android.synthetic.main.bottom_sheet_webview.view.*
 
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -145,6 +149,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val title = itemView?.findViewById<TextView>(R.id.list_item_title)
         val content = itemView?.findViewById<TextView>(R.id.list_item_content)
         val image = itemView?.findViewById<ImageView>(R.id.list_item_image)
+        val keywordGroup = itemView?.findViewById<ChipGroup>(R.id.list_item_keyword_group)
 
         fun bind(item: RssItem?, context: Context) {
             card?.layoutParams?.apply {
@@ -153,6 +158,24 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             title?.text = item?.title
             content?.text = item?.description
+
+            keywordGroup?.removeAllViews()
+            for (keyword in item?.keyword!!) {
+                val chip = Chip(context).apply {
+                    setChipDrawable(
+                        ChipDrawable.createFromAttributes(
+                            context,
+                            null,
+                            0,
+                            R.style.Widget_MaterialComponents_Chip_Action
+                        )
+                    )
+                    isCheckable = false
+                    isChipIconVisible = false
+                    text = keyword
+                }
+                keywordGroup?.addView(chip)
+            }
 
             Glide.with(context)
                 .load(item?.image)

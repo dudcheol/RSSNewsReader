@@ -13,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
+import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.util.dpToPx
 
 
@@ -23,7 +24,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     constructor(
         context: Context,
-        items: List<HashMap<String, String>>,
+        items: List<RssItem>,
         adapterClickListener: AdapterClickListener,
         onLoadMoreListener: OnLoadMoreListener,
         linearLayoutManager: LinearLayoutManager
@@ -36,7 +37,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     lateinit var context: Context
-    lateinit var items: ArrayList<HashMap<String, String>?>
+    lateinit var items: ArrayList<RssItem?>
 
     lateinit var adapterClickListener: AdapterClickListener
     lateinit var onLoadMoreListener: OnLoadMoreListener
@@ -103,7 +104,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
 
-    fun addItemMore(newOne: List<HashMap<String, String>>) {
+    fun addItemMore(newOne: List<RssItem>) {
         items.addAll(newOne)
         Log.e(Tag, "addItemMore : ${items}")
         notifyItemRangeChanged(0, items.size)
@@ -145,22 +146,22 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val content = itemView?.findViewById<TextView>(R.id.list_item_content)
         val image = itemView?.findViewById<ImageView>(R.id.list_item_image)
 
-        fun bind(item: HashMap<String, String>?, context: Context) {
+        fun bind(item: RssItem?, context: Context) {
             card?.layoutParams?.apply {
                 height = dpToPx(context, ITEM_HEIGHT_DP)
             }.run { card?.layoutParams = this }
 
-            title?.text = item?.get("title")
-            content?.text = item?.get("description")
+            title?.text = item?.title
+            content?.text = item?.description
 
             Glide.with(context)
-                .load(item?.get("image"))
+                .load(item?.image)
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(image!!)
 
             itemView.setOnClickListener {
                 //nextPage
-                item?.get("link")?.let { adapterClickListener.setOnClickListener(it) }
+                item?.link?.let { adapterClickListener.setOnClickListener(it) }
                 Log.e(Tag, "itemView clicked!")
             }
         }

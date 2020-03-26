@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
+import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
@@ -27,7 +28,7 @@ class NewsListActivity : AppCompatActivity() {
     val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener{
         override fun setOnClickListener(url: String) {
             BottomSheetWebView(this@NewsListActivity).run {
-                showWithUrl(url)
+                showBottomSheetWebView(url)
             }
         }
     }
@@ -87,7 +88,7 @@ class NewsListActivity : AppCompatActivity() {
     }
 
     fun createRssAdapter(
-        items: List<HashMap<String, String>>,
+        items: List<RssItem>,
         onLoadMoreListener: RSSFeedListAdapter.OnLoadMoreListener,
         linearLayoutManager: LinearLayoutManager,
         recyclerView: RecyclerView

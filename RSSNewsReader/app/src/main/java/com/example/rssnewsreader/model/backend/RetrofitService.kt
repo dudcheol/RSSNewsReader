@@ -32,7 +32,6 @@ class RetrofitService {
         }
 
         fun buildHtmlService(
-            link: String,
             serviceClass: Class<DocumentInterface>
         ): DocumentInterface {
             return Retrofit.Builder()

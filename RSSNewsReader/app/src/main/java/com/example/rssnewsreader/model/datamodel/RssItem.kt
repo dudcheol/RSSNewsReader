@@ -11,8 +11,11 @@ data class RssItem(
 //    @field:Element(name = "guid") @param:Element(name = "guid") var guid : String,
     @field:Element(name = "title") @param:Element(name = "title") var title: String,
     @field:Element(name = "link") @param:Element(name = "link") var link: String
-//    @field:Element(name = "description") @param:Element(name = "description") var description: String
 ) {
+    var description: String = "-"
+    var image: String = "-"
+    var keyword: List<String> = listOf()
+
     override fun toString(): String =
-        "RssItem [title=${title}, link=${link}]"
+        "RssItem [title=${title}, link=${link}, description=$description, keyword=$keyword]"
 }

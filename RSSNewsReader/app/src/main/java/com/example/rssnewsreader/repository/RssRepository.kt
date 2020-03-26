@@ -30,16 +30,13 @@ class RssRepository {
 
     fun getDetailItem(items: List<RssItem>): Single<List<Any>> {
         observableList.clear() // note 여길 초기화하고 진행한다면?
-        for (item in items) {
+        for (item in items)
             observableList.add(
                 getApiObservable(
-                    api = RetrofitService.buildHtmlService(
-                        item.link,
-                        DocumentInterface::class.java
-                    ), item = item
+                    api = RetrofitService.buildHtmlService(DocumentInterface::class.java),
+                    item = item
                 )
             )
-        }
 //        for (i in 0..3) { // note : 적은 데이터를 불러오는 것 테스트하기 위한 코드
 //            observableList.add(
 //                getApiObservable(
@@ -69,20 +66,28 @@ class RssRepository {
 //                        Log.e(Tag, "통신 제대로 했나? /// ${document}")
 //                        it.onNext(response.body())
                         // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
-                        emitter.onSuccess(HashMap<String, String>().apply {
-                            put("title", item.title)
-                            put("link", item.link)
-                            put(
-                                "description",
+                        emitter.onSuccess(item.apply {
+                            description =
                                 document?.select("meta[property=og:description]")?.attr("content")
                                     .toString()
-                            )
-                            put(
-                                "image",
-                                document?.select("meta[property=og:image]")?.attr("content")
-                                    .toString()
-                            )
-                        })
+                            keyword = listOf()
+                            image = document?.select("meta[property=og:image]")?.attr("content")
+                                .toString()
+                        }
+//                            HashMap<String, String>().apply {
+//                            put("title", item.title)
+//                            put("link", item.link)
+//                            put(
+//                                "description",
+//                                document?.select("meta[property=og:description]")?.attr("content")
+//                                    .toString()
+//                            )
+//                            put(
+//                                "image",
+//                                document?.select("meta[property=og:image]")?.attr("content")
+//                                    .toString()
+//                            ) }
+                        )
 //                        emitter.onError() //Todo error처리
                     }
                 }, {
@@ -90,12 +95,17 @@ class RssRepository {
                         // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
                         Log.e(Tag, "item detail load fail...!! : $it")
                         emitter.onSuccess(
-                            mapOf(
-                                "title" to "Unknown",
-                                "link" to "Unknown",
-                                "description" to "Unknown",
-                                "image" to "Unknown"
-                            )
+                            item.apply {
+                                description = "불러오는 데 실패했습니다"
+                                keyword = listOf()
+                                image = " unKnown "
+                            }
+//                            mapOf(
+//                                "title" to "Unknown",
+//                                "link" to "Unknown",
+//                                "description" to "Unknown",
+//                                "image" to "Unknown"
+//                            )
                         )
                         //e.onNext((T) new EmptyData());
 //                        emitter.onError()  // Todo 에러처리
@@ -108,9 +118,9 @@ class RssRepository {
     /**
      * Observable list를 zip()으로 결합
      */
-    private fun combineObservables(observableList: List<Single<Any>>): Single<List<Any>> { // note : List는 ArrayList임
+    private fun combineObservables(observableList: List<Single<Any>>): Single<List<Any>> {
         return Single.zip(observableList) { args ->
-            val mapList = ArrayList<Any>()
+            val mapList = arrayListOf<Any>()
             for (item in args) {
 //                Log.e(Tag, "combineObservables - $item")
                 mapList.add(item)

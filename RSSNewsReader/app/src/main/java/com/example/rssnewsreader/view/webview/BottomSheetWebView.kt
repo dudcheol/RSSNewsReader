@@ -76,7 +76,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
         }
     }
 
-    fun showWithUrl(url: String) {
+    fun showBottomSheetWebView(url: String) {
         webView.loadUrl(url)
         mBottomSheetDialog.show()
     }

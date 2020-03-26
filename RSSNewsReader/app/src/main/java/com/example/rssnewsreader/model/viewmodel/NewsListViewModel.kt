@@ -24,8 +24,8 @@ class NewsListViewModel : ViewModel() {
         get() = _rssFeedLiveData
 
     //    var detailItemLiveData: MutableLiveData<ArrayList<HashMap<String, String>>> = MutableLiveData()
-    private val _detailItemLiveData = MutableLiveData<List<HashMap<String, String>>>()
-    val detailItemLiveData: LiveData<List<HashMap<String, String>>>
+    private val _detailItemLiveData = MutableLiveData<List<RssItem>>()
+    val detailItemLiveData: LiveData<List<RssItem>>
         get() = _detailItemLiveData
 
     val rssFeedCnt = MutableLiveData<Int>()
@@ -38,6 +38,7 @@ class NewsListViewModel : ViewModel() {
     }
 
     fun initRssFeed(itemCnt : Int) {
+        Log.e("Track", "initRssFeed 진입")
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -89,14 +90,14 @@ class NewsListViewModel : ViewModel() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
-                { t ->
+                {
 //                    val castedValue = t?.filterIsInstance<HashMap<String, String>>().apply {
                     // note 여기서 t에 중복 들어와있음
                     Log.e(
                         Tag,
-                        "getDetailItems - observable - onNext : ${(t as List<HashMap<String, String>>).toString()}"
+                        "getDetailItems - observable - onNext : ${it}"
                     )
-                    _detailItemLiveData.postValue(t as List<HashMap<String, String>>)
+                    _detailItemLiveData.postValue(it as List<RssItem>)
                 }, { e ->
                     Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }).also { compositeDisposable.add(it) }

@@ -181,7 +181,6 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                         )
                     )
                     isClickable = false
-                    isChipIconVisible = false
                     text = keyword
                     textSize = 15F
                     textAlignment = Chip.TEXT_ALIGNMENT_CENTER

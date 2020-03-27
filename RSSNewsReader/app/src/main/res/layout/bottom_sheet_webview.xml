@@ -82,6 +82,18 @@
                 android:layout_below="@id/divider"
                 android:layout_marginBottom="16dp"
                 android:overScrollMode="never" />
+
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/webView_placeholder"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_below="@id/divider"
+                app:shimmer_duration="2000">
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@color/greyStroke"/>
+            </com.facebook.shimmer.ShimmerFrameLayout>
         </RelativeLayout>
     </androidx.cardview.widget.CardView>
 

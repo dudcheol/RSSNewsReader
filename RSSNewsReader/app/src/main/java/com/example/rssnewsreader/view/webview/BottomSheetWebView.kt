@@ -1,8 +1,10 @@
 package com.example.rssnewsreader.view.webview
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import android.view.View
+import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
 import com.example.rssnewsreader.R
@@ -89,9 +91,23 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
     fun showBottomSheetWebView(item: RssItem) {
         Log.e(Tag, "$item")
         webView.loadUrl(item.link)
+        webView.webViewClient = object : WebViewClient() {
+            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
+                webView_placeholder.run {
+                    startShimmer()
+                    visibility = View.VISIBLE
+                }
+            }
+
+            override fun onPageFinished(view: WebView?, url: String?) {
+                webView_placeholder.run {
+                    stopShimmer()
+                    visibility = View.GONE
+                }
+            }
+        }
         bottom_sheet_title.text = item.title
-        for (keyword in item.keyword) {
-//            val chip = Chip(bottom_sheet_keyword_group.context)
+        for (keyword in item?.keyword!!) {
             val chip = Chip(context).apply {
                 setChipDrawable(
                     ChipDrawable.createFromAttributes(
@@ -101,11 +117,16 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                         R.style.Widget_MaterialComponents_Chip_Action
                     )
                 )
-                isCheckable = false
-                isChipIconVisible = false
+                isClickable = false
                 text = keyword
+                textSize = 15F
+                textAlignment = Chip.TEXT_ALIGNMENT_CENTER
+                animation = null
+//                    setTextColor(ContextCompat.getColor(context, R.color.mainLightColor))
+                setChipBackgroundColorResource(R.color.greyBackground2)
+                setRippleColorResource(R.color.alpha0)
             }
-            bottom_sheet_keyword_group.addView(chip)
+            bottom_sheet_keyword_group?.addView(chip)
         }
 //        bottom_sheet_keyword_1.text = item.keyword[0]
 //        bottom_sheet_keyword_2.text = item.keyword[1]

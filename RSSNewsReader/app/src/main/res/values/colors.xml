@@ -15,4 +15,5 @@
     <color name="greyIcon">#66696E</color>
     <color name="greyIconInButton">#C3C3C3</color>
     <color name="grey4">#F5F5F5</color>
+    <color name="greyStatus">#999999</color>
 </resources>

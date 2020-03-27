@@ -1,8 +1,13 @@
 package com.example.rssnewsreader.view.activity
 
+import android.graphics.Color
 import android.graphics.Point
+import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
+import android.widget.RelativeLayout
+import android.widget.Toolbar
+import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
@@ -15,7 +20,6 @@ import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import com.example.rssnewsreader.view.webview.BottomSheetWebView
-import kotlinx.android.synthetic.main.newslist_activity.*
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
@@ -25,7 +29,7 @@ class NewsListActivity : AppCompatActivity() {
     private var adapter: RSSFeedListAdapter? = null
     private var isInit: Boolean = false
 
-    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener{
+    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
         override fun setOnClickListener(item: RssItem) {
             BottomSheetWebView(this@NewsListActivity).run {
                 showBottomSheetWebView(item)
@@ -50,6 +54,8 @@ class NewsListActivity : AppCompatActivity() {
         Log.e(Tag, "$Tag onCreate!")
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
         newsListViewModel = NewsListViewModel()
+
+        toolbarSettig()
 
 //        adapter = NewsListAdapter()
 
@@ -86,6 +92,16 @@ class NewsListActivity : AppCompatActivity() {
                     }
                 }
             })
+    }
+
+    fun toolbarSettig() {
+        supportActionBar?.run {
+            setDisplayShowCustomEnabled(true)
+            displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
+            customView = layoutInflater.inflate(R.layout.action_bar, null)
+            ((customView.parent) as androidx.appcompat.widget.Toolbar).setContentInsetsAbsolute(0,0)
+            elevation = 0F
+        }
     }
 
     fun createRssAdapter(

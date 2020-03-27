@@ -11,7 +11,6 @@ import com.example.rssnewsreader.util.SingleLiveEvent
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import java.util.*
 
 class NewsListViewModel : ViewModel() {
     private val __singleLiveEvent = SingleLiveEvent<Any>()
@@ -30,6 +29,7 @@ class NewsListViewModel : ViewModel() {
         get() = _detailItemLiveData
 
     val rssFeedCnt = MutableLiveData<Int>()
+    var rssFeedTotalCount = 0
     private var currentFeedPos = 0
     private lateinit var rssFeedList: List<RssItem>
 
@@ -46,6 +46,7 @@ class NewsListViewModel : ViewModel() {
             .subscribe({
                 // note : success
                 rssFeedList = it.channel.item
+                rssFeedTotalCount = rssFeedList.size
                 Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
 //                rssFeedCnt.postValue(rssFeedList.size)
                 currentFeedPos = itemCnt

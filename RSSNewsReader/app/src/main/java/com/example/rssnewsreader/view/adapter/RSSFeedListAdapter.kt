@@ -15,10 +15,11 @@ import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.util.dpToPx
+import com.facebook.shimmer.Shimmer
+import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 import com.google.android.material.chip.ChipGroup
-import kotlinx.android.synthetic.main.bottom_sheet_webview.view.*
 
 
 class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -26,27 +27,13 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         fun setOnClickListener(item: RssItem)
     }
 
-    constructor(
-        context: Context,
-        items: List<RssItem>,
-        adapterClickListener: AdapterClickListener,
-        onLoadMoreListener: OnLoadMoreListener,
-        linearLayoutManager: LinearLayoutManager
-    ) : this() {
-        this.context = context
-        this.items = ArrayList(items)
-        this.adapterClickListener = adapterClickListener
-        this.onLoadMoreListener = onLoadMoreListener
-        this.linearLayoutManager = linearLayoutManager
-    }
-
     lateinit var context: Context
     lateinit var items: ArrayList<RssItem?>
-
     lateinit var adapterClickListener: AdapterClickListener
     lateinit var onLoadMoreListener: OnLoadMoreListener
     lateinit var linearLayoutManager: LinearLayoutManager
 
+    var totalRssCount: Int = 0
     var isModeLoading = false
     var isRefresing = false
     var firstVisibleItem = 0
@@ -60,6 +47,22 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         const val VISIBLE_THRESHOLD = 1
         private const val VIEW_ITEM = 1;
         private const val VIEW_PROG = 0;
+    }
+
+    constructor(
+        context: Context,
+        items: List<RssItem>,
+        totalRssCount: Int,
+        adapterClickListener: AdapterClickListener,
+        onLoadMoreListener: OnLoadMoreListener,
+        linearLayoutManager: LinearLayoutManager
+    ) : this() {
+        this.context = context
+        this.items = ArrayList(items)
+        this.adapterClickListener = adapterClickListener
+        this.onLoadMoreListener = onLoadMoreListener
+        this.linearLayoutManager = linearLayoutManager
+        this.totalRssCount = totalRssCount
     }
 
     public interface OnLoadMoreListener {
@@ -99,10 +102,13 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return if (viewType == VIEW_ITEM) {
-            Holder(LayoutInflater.from(context).inflate(R.layout.newslist_item, parent, false))
+            RssItemViewHolder(
+                LayoutInflater.from(context).inflate(R.layout.newslist_item, parent, false)
+            )
         } else {
             ProgressViewHolder(
-                LayoutInflater.from(context).inflate(R.layout.newslist_item_progress, parent, false)
+                LayoutInflater.from(context)
+                    .inflate(R.layout.newslist_item_placeholder, parent, false)
             )
         }
     }
@@ -123,8 +129,10 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
-        if (holder is Holder)
+        if (holder is RssItemViewHolder)
             holder.bind(items[position], context)
+        else if (holder is ProgressViewHolder)
+            holder.bind()
     }
 
     fun setProgressMore(isProgress: Boolean) {
@@ -143,7 +151,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         this.isRefresing = isRefresing
     }
 
-    inner class Holder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
+    inner class RssItemViewHolder(itemView: View?) : RecyclerView.ViewHolder(itemView!!) {
         //coding your own view
         val card = itemView?.findViewById<LinearLayout>(R.id.list_item)
         val title = itemView?.findViewById<TextView>(R.id.list_item_title)
@@ -173,6 +181,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                     isCheckable = false
                     isChipIconVisible = false
                     text = keyword
+                    textSize = 15F
                 }
                 keywordGroup?.addView(chip)
             }
@@ -182,7 +191,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 .placeholder(R.drawable.ic_launcher_background)
                 .into(image!!)
 
-            itemView.setOnClickListener {
+            card?.setOnClickListener {
                 //nextPage
                 item?.let { adapterClickListener.setOnClickListener(it) }
                 Log.e(Tag, "itemView clicked!")
@@ -190,5 +199,18 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    inner class ProgressViewHolder(v: View) : ViewHolder(v) {}
+    inner class ProgressViewHolder(itemView: View) : ViewHolder(itemView) {
+        val placeholder = itemView.findViewById<ShimmerFrameLayout>(R.id.list_item_placeholder)
+        fun bind() {
+            if (totalItemCount >= totalRssCount) {
+                // 애니메이션효과 멈추고 맨위로 버튼 생성!
+                placeholder.visibility = View.GONE
+                placeholder.stopShimmer()
+            } else {
+                // 로딩중...
+                itemView.findViewById<ShimmerFrameLayout>(R.id.list_item_placeholder).visibility = View.VISIBLE
+                placeholder.startShimmer()
+            }
+        }
+    }
 }

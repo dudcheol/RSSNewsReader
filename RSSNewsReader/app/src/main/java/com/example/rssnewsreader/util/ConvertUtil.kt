@@ -1,17 +1,20 @@
 package com.example.rssnewsreader.util
 
 import android.content.Context
+import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.Log
+import android.view.View
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.LiveDataReactiveStreams
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.ItemDecoration
 import io.reactivex.BackpressureStrategy
 import io.reactivex.Flowable
 import io.reactivex.Observable
 import org.jsoup.nodes.Element
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
-import java.nio.charset.Charset
 
 fun <T> Flowable<T>.toLiveData(): LiveData<T> {
     return LiveDataReactiveStreams.fromPublisher(this)
@@ -67,4 +70,24 @@ fun convertCharset(elem: Element): String {
     val tmpDecode = String(bbuffer.array())
     Log.e("ConvertUtil", "euc_kr을 utf-8로 변환 = $tmpDecode")
     return tmpDecode
+}
+
+fun getRecyclerPaddingItemDeco(padding : Int): ItemDecoration {
+    return object : ItemDecoration() {
+        override fun getItemOffsets(
+            outRect: Rect,
+            view: View,
+            parent: RecyclerView,
+            state: RecyclerView.State
+        ) {
+            if (parent.paddingLeft != padding) {
+                parent.setPadding(0, padding, 0, padding)
+                parent.clipToPadding = false
+            }
+            outRect.top = padding
+            outRect.bottom = padding
+            outRect.left = 0
+            outRect.right = 0
+        }
+    }
 }

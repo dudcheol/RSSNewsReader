@@ -3,6 +3,7 @@ package com.example.rssnewsreader.view.activity
 import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -14,6 +15,7 @@ import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
+import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import com.example.rssnewsreader.view.webview.BottomSheetWebView
 
@@ -70,11 +72,17 @@ class NewsListActivity : AppCompatActivity() {
                 Log.e(Tag, "newsListViewModel detailItemLiveData : it size ${it.size} , ${it}")
 //                it ?: return@Observer
 //                adapter.submitList(it)
+                binding.listRecyclerPlaceholder.run {
+                    stopShimmer()
+                    visibility = View.GONE
+                }
+
                 if (!isInit || adapter == null) {
                     binding.listSwipeRefresher.isRefreshing = false
                     adapter?.suppressLoadingRss(false)
                     adapter = createRssAdapter(
                         it,
+                        newsListViewModel.rssFeedTotalCount,
                         onLoadMoreListener,
                         LinearLayoutManager(this@NewsListActivity),
                         binding.listRecycler
@@ -95,16 +103,26 @@ class NewsListActivity : AppCompatActivity() {
             setDisplayShowCustomEnabled(true)
             displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
             customView = layoutInflater.inflate(R.layout.action_bar, null)
-            ((customView.parent) as androidx.appcompat.widget.Toolbar).setContentInsetsAbsolute(0, 0)
+            ((customView.parent) as androidx.appcompat.widget.Toolbar).setContentInsetsAbsolute(
+                0,
+                0
+            )
             elevation = 0F
         }
         binding.listSwipeRefresher.setColorSchemeResources(
             R.color.greyIcon, R.color.greyStatus
         )
+        binding.listRecycler.run {
+            setHasFixedSize(true)
+            addItemDecoration(getRecyclerPaddingItemDeco(dpToPx(context, 5)))
+            itemAnimator = null
+        }
+        binding.listRecyclerPlaceholder.startShimmer()
     }
 
     fun createRssAdapter(
         items: List<RssItem>,
+        itemsSize: Int,
         onLoadMoreListener: RSSFeedListAdapter.OnLoadMoreListener,
         linearLayoutManager: LinearLayoutManager,
         recyclerView: RecyclerView
@@ -112,13 +130,12 @@ class NewsListActivity : AppCompatActivity() {
         return RSSFeedListAdapter(
             this,
             items,
+            itemsSize,
             onAdapterClickListener,
             onLoadMoreListener,
             linearLayoutManager
         ).apply {
             binding.listRecycler.run {
-                setHasFixedSize(true)
-//                            setHasStableIds(true)
                 layoutManager = linearLayoutManager
                 adapter = this@apply
             }

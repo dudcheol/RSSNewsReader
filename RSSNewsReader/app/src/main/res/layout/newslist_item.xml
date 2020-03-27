@@ -13,6 +13,7 @@
         android:layout_width="match_parent"
         android:layout_height="130dp"
         android:background="@android:color/white"
+        android:foreground="@drawable/alpha_button"
         android:orientation="horizontal">
 
         <ImageView
@@ -40,6 +41,7 @@
                 android:paddingTop="10dp"
                 android:paddingRight="10dp"
                 android:text="뉴스 제목"
+                android:textColor="@android:color/black"
                 android:textSize="18dp"
                 android:textStyle="bold" />
 
@@ -56,6 +58,7 @@
                 android:paddingTop="10dp"
                 android:paddingRight="10dp"
                 android:text="뉴스 내용"
+                android:textColor="@color/greyIcon"
                 android:textSize="15dp"
                 android:textStyle="normal" />
 

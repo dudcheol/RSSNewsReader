@@ -7,6 +7,7 @@
     <color name="mainDarkColor">#2995ED</color>
     <color name="mainLightColor">#E7F4FC</color>
     
+    <color name="whiteColor">#FFFFFF</color>
     <color name="greyBackground">#F5F5F5</color>
     <color name="greyBackground2">#E8ECEF</color>
     <color name="greyDivider">#F0F0F2</color>
@@ -16,4 +17,7 @@
     <color name="greyIconInButton">#C3C3C3</color>
     <color name="grey4">#F5F5F5</color>
     <color name="greyStatus">#999999</color>
+
+    <color name="alpha0">#00FFFFFF</color>
+    <color name="halfAlphaBlack">#12000000</color>
 </resources>

@@ -6,19 +6,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.activity.NewsListActivity">
-
-        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-            android:id="@+id/list_swipe_refresher"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
-
-            <androidx.recyclerview.widget.RecyclerView
-                android:id="@+id/list_recycler"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:overScrollMode="never" />
-        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+        tools:context=".view.activity.NewsListActivity"
+        android:background="@color/greyStroke">
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/list_recycler_placeholder"
@@ -40,5 +29,17 @@
                 <include layout="@layout/newslist_placeholder" />
             </LinearLayout>
         </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+            android:id="@+id/list_swipe_refresher"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/list_recycler"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:overScrollMode="never" />
+        </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
     </RelativeLayout>
 </layout>

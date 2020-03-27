@@ -6,12 +6,9 @@ import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.backend.RssInterFace
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
-import com.example.rssnewsreader.util.convertCharset
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-import org.jsoup.Jsoup
-import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -111,7 +108,9 @@ class RssRepository {
                             // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
                             emitter.onSuccess(
                                 item.apply {
-                                    description = ogDescription
+                                    description =
+                                        if (ogDescription.trim().isEmpty()) item.title
+                                        else ogDescription
                                     keyword = createKeyword(description)
                                     image = ogImage
                                 }
@@ -137,9 +136,9 @@ class RssRepository {
                             Log.e(Tag, "item detail load fail...!! : $it")
                             emitter.onSuccess(
                                 item.apply {
-                                    description = ERROR_DESCRIPTION
-                                    keyword = listOf(ERROR_KEYWORD)
-                                    image = " unKnown "
+                                    description = item.title
+                                    keyword = createKeyword(description)
+                                    image = "not found"
                                 }
 //                            mapOf(
 //                                "title" to "Unknown",

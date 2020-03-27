@@ -28,7 +28,8 @@
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
                 android:padding="10dp"
-                android:src="@drawable/ic_news_icon" />
+                android:src="@drawable/ic_news_icon"
+                android:backgroundTint="@color/whiteColor"/>
         </RelativeLayout>
 
         <ImageView

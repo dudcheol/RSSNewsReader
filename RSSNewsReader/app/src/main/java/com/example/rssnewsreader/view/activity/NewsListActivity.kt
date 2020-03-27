@@ -6,6 +6,7 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -109,9 +110,10 @@ class NewsListActivity : AppCompatActivity() {
             )
             elevation = 0F
         }
-        binding.listSwipeRefresher.setColorSchemeResources(
-            R.color.greyIcon, R.color.greyStatus
-        )
+        binding.listSwipeRefresher.run {
+            setColorSchemeResources(R.color.whiteColor)
+            setProgressBackgroundColorSchemeResource(R.color.mainDarkColor)
+        }
         binding.listRecycler.run {
             setHasFixedSize(true)
             addItemDecoration(getRecyclerPaddingItemDeco(dpToPx(context, 5)))

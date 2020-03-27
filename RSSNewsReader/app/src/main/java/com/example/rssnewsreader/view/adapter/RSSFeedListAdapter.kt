@@ -8,9 +8,11 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.airbnb.lottie.LottieAnimationView
 import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.datamodel.RssItem
@@ -178,38 +180,49 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                             R.style.Widget_MaterialComponents_Chip_Action
                         )
                     )
-                    isCheckable = false
+                    isClickable = false
                     isChipIconVisible = false
                     text = keyword
                     textSize = 15F
+                    textAlignment = Chip.TEXT_ALIGNMENT_CENTER
+                    animation = null
+//                    setTextColor(ContextCompat.getColor(context, R.color.mainLightColor))
+                    setChipBackgroundColorResource(R.color.greyBackground2)
+                    setRippleColorResource(R.color.alpha0)
                 }
                 keywordGroup?.addView(chip)
             }
 
             Glide.with(context)
                 .load(item?.image)
-                .placeholder(R.drawable.ic_launcher_background)
+                .placeholder(R.color.whiteColor)
+                .error(R.drawable.ic_news_icon_dark)
                 .into(image!!)
 
             card?.setOnClickListener {
                 //nextPage
                 item?.let { adapterClickListener.setOnClickListener(it) }
-                Log.e(Tag, "itemView clicked!")
+                Log.e(Tag, "내용 : ${item}")
             }
         }
     }
 
     inner class ProgressViewHolder(itemView: View) : ViewHolder(itemView) {
         val placeholder = itemView.findViewById<ShimmerFrameLayout>(R.id.list_item_placeholder)
+        val doneAnim = itemView.findViewById<LottieAnimationView>(R.id.list_item_done_anim)
         fun bind() {
             if (totalItemCount >= totalRssCount) {
-                // 애니메이션효과 멈추고 맨위로 버튼 생성!
                 placeholder.visibility = View.GONE
                 placeholder.stopShimmer()
+                doneAnim.run {
+                    setAnimation("check-mark-done.json")
+                    visibility = View.VISIBLE
+                    playAnimation()
+                }
             } else {
-                // 로딩중...
-                itemView.findViewById<ShimmerFrameLayout>(R.id.list_item_placeholder).visibility = View.VISIBLE
+                placeholder.visibility = View.VISIBLE
                 placeholder.startShimmer()
+                doneAnim.visibility = View.GONE
             }
         }
     }

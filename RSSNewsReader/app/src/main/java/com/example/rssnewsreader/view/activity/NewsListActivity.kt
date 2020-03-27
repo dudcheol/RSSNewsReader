@@ -55,6 +55,7 @@ class NewsListActivity : AppCompatActivity() {
 
         binding.listSwipeRefresher.setOnRefreshListener {
             newsListViewModel.clearDisposable()
+            // Todo : refesh 시 뷰모델 초기화하는게 좋을지.. (메모리관련) 고민!
             adapter?.suppressLoadingRss(true)
             adapter = null
             newsListViewModel.initRssFeed(getOptimalItemSizeInit())

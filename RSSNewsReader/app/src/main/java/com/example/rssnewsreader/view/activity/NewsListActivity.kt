@@ -1,12 +1,8 @@
 package com.example.rssnewsreader.view.activity
 
-import android.graphics.Color
 import android.graphics.Point
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.util.Log
-import android.widget.RelativeLayout
-import android.widget.Toolbar
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
@@ -55,7 +51,7 @@ class NewsListActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
         newsListViewModel = NewsListViewModel()
 
-        toolbarSettig()
+        initSettig()
 
 //        adapter = NewsListAdapter()
 
@@ -94,14 +90,17 @@ class NewsListActivity : AppCompatActivity() {
             })
     }
 
-    fun toolbarSettig() {
+    fun initSettig() {
         supportActionBar?.run {
             setDisplayShowCustomEnabled(true)
             displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
             customView = layoutInflater.inflate(R.layout.action_bar, null)
-            ((customView.parent) as androidx.appcompat.widget.Toolbar).setContentInsetsAbsolute(0,0)
+            ((customView.parent) as androidx.appcompat.widget.Toolbar).setContentInsetsAbsolute(0, 0)
             elevation = 0F
         }
+        binding.listSwipeRefresher.setColorSchemeResources(
+            R.color.greyIcon, R.color.greyStatus
+        )
     }
 
     fun createRssAdapter(

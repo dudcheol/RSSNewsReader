@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
         android:includeFontPadding="false"
-        android:text="뉴스 피드"
+        android:text="뉴스피드"
         android:textColor="@android:color/black"
         android:textSize="16dp"
         android:textStyle="bold" />

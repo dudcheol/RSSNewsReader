@@ -5,11 +5,88 @@
     android:layout_height="match_parent"
     tools:context=".view.activity.SplashActivity">
 
-    <TextView
+    <RelativeLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:text="splash screen"
-        android:textSize="50dp" />
+        android:layout_margin="70dp">
 
+        <RelativeLayout
+            android:id="@+id/logo"
+            android:layout_width="120dp"
+            android:layout_height="120dp"
+            android:layout_centerHorizontal="true">
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:src="@drawable/oval_shape" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_centerInParent="true"
+                android:padding="10dp"
+                android:src="@drawable/ic_news_icon" />
+        </RelativeLayout>
+
+        <ImageView
+            android:id="@+id/image_rss"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignBottom="@id/logo"
+            android:src="@drawable/ic_rss" />
+
+        <ImageView
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_alignBottom="@id/logo"
+            android:layout_alignParentEnd="true"
+            android:src="@drawable/ic_internet" />
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/logo"
+            android:layout_centerHorizontal="true"
+            android:paddingTop="50dp"
+            android:paddingLeft="50dp"
+            android:paddingRight="50dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:inputType="textMultiLine"
+                android:text="최신 뉴스를 제공합니다"
+                android:textColor="@color/greyIcon" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="7dp"
+                android:inputType="textMultiLine"
+                android:text="뉴스의 키워드를 알아보세요"
+                android:textColor="@color/greyIcon" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textMultiLine"
+                android:text="뉴스를 클릭하면 원본 뉴스를 볼 수 있습니다."
+                android:textColor="@color/greyIcon" />
+        </LinearLayout>
+    </RelativeLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="20dp"
+        android:text="v 1.0"
+        android:textColor="@color/greyStatus"
+        android:textStyle="bold" />
 </RelativeLayout>

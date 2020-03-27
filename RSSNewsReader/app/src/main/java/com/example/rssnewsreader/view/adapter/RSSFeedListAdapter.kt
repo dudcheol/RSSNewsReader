@@ -45,7 +45,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     companion object {
         const val Tag = "RSSFeedListAdapter"
-        const val ITEM_HEIGHT_DP = 130
+        const val ITEM_HEIGHT_DP = 140
         const val VISIBLE_THRESHOLD = 1
         private const val VIEW_ITEM = 1;
         private const val VIEW_PROG = 0;

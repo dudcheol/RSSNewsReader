@@ -26,14 +26,46 @@ object JsoupConverterFactory : Converter.Factory() {
     private class JsoupConverter(val baseUri: String) : Converter<ResponseBody, Document?> {
 
         override fun convert(value: ResponseBody?): Document? {
-            val charset = value?.contentType()?.charset() ?: Charset.forName("UTF-8")
+            val charset = value?.contentType()?.charset()
 
-            val parser = when (value?.contentType().toString()) {
-                "application/xml", "text/xml" -> Parser.xmlParser()
-                else -> Parser.htmlParser()
-            }
+//            val valueToByte = value?.byteStream()
+//            Log.e("jsoup check", valueToByte.toString())
+//            Log.e("jsoup check", valueToByte.toString())
 
-            return Jsoup.parse(value?.byteStream(), charset.name(), baseUri, parser)
+//            val reader = BufferedReader(valueToByte!!.reader())
+//            val content = StringBuilder()
+//            try {
+//                var line = reader.readLine()
+//                while (line != null) {
+//                    content.append(line)
+//                    line = reader.readLine()
+//                }
+//            } finally {
+//                reader.close()
+//            }
+//
+//            val doc = Jsoup.parse(content.toString())
+//            Log.e("jsoup check", content.toString())
+//
+//
+//            val isNeedConvert =
+//                doc.head().select("meta[http-equiv=Content-Type]").attr("content")
+//                    .toLowerCase()
+//                    .contains("euc-kr") || doc.select("meta[charset]").text()
+//                    .toLowerCase()
+//                    .contains("euc-kr")
+//
+//            val charset = if (isNeedConvert) "euc-kr" else "utf-8"
+
+//            val parser = when (value?.contentType().toString()) {
+//                "application/xml", "text/xml" -> Parser.xmlParser()
+//                else -> Parser.htmlParser()
+//            }
+//            Log.e("jsoup check", value?.string())
+//            Log.e("jsoup check", value?.contentType()?.charset()?.name())
+//            Log.e("jsoup check", charset)
+//            Log.e("jsoup check", valueToByte.toString())
+            return Jsoup.parse(value?.byteStream(), charset?.name(), baseUri/*, parser*/)
         }
     }
 }

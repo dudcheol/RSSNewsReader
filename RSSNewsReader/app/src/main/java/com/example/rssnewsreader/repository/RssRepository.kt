@@ -6,9 +6,12 @@ import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.backend.RssInterFace
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
+import com.example.rssnewsreader.util.convertCharset
 import io.reactivex.Single
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.jsoup.Jsoup
+import java.nio.charset.Charset
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -65,20 +68,53 @@ class RssRepository {
 //                .retry(3) // Todo : 모든 상황에서 retry는 좋지못함
                 .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
-                .subscribe({ document ->
-                    if (!emitter.isDisposed) {
+                .subscribe(
+                    { document ->
+                        // 해당 document의 charset 알아내기
+                        var head = document.head()
+//                        val isNeedConvert =
+//                            head.select("meta[http-equiv=Content-Type]").attr("content")
+//                                .toLowerCase()
+//                                .contains("euc-kr") || head.select("meta[charset]").text()
+//                                .toLowerCase()
+//                                .contains("euc-kr")
+//                        Log.e(Tag, "this document(${item.title}) is need convert? $isNeedConvert")
+
+//                        if (isNeedConvert) {
+////                        document.charset(Charsets.ISO_8859_1)
+////                        document.updateMetaCharsetElement(true)
+//                            Log.e(Tag, "before Converted output setting = ${item.title} : ${document.outputSettings().charset()}")
+//                            val convertedHtml = Jsoup.parse(document.html())
+//                            convertedHtml.charset(Charset.forName("euc-kr"))
+//                            Log.e(Tag, "after Converted output setting = ${item.title} : ${convertedHtml.outputSettings().charset()}")
+//                            Log.e(Tag, "Converted document!! ${item.title} : ${convertedHtml}")
+//                            head = convertedHtml.head()
+//                            Log.e(Tag, "Converted head!! ${item.title} : ${head}")
+////                        Log.e(Tag, "Converted head.text!! ${head.text()}") // 얘는 깨져서 나옴
+//                            convertCharset(head)
+//                        }
+
+//                        Log.e(Tag, "isNeedConvert? $isNeedConvert")
+                        var ogDescription =
+                            head.select("meta[property=og:description]").attr("content")
+//                        if (isNeedConvert) {
+////                        ogDescription = convertCharset(ogDescription)
+//                        }
+//                        Log.e(Tag, "isNeedConvert => $ogDescription")
+
+                        val ogImage =
+                            head.select("meta[property=og:image]").attr("content")
+
+                        if (!emitter.isDisposed) {
 //                        Log.e(Tag, "통신 제대로 했나? /// ${document}")
 //                        it.onNext(response.body())
-                        // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
-                        emitter.onSuccess(item.apply {
-                            description =
-                                document.select("meta[property=og:description]")?.attr("content")
-                                    ?: ERROR_DESCRIPTION
-                            keyword = createKeyword(description)
-                            image =
-                                document?.select("meta[property=og:image]")?.attr("content")
-                                    ?: ERROR_DESCRIPTION
-                        }
+                            // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
+                            emitter.onSuccess(
+                                item.apply {
+                                    description = ogDescription
+                                    keyword = createKeyword(description)
+                                    image = ogImage
+                                }
 //                            HashMap<String, String>().apply {
 //                            put("title", item.title)
 //                            put("link", item.link)
@@ -92,30 +128,30 @@ class RssRepository {
 //                                document?.select("meta[property=og:image]")?.attr("content")
 //                                    .toString()
 //                            ) }
-                        )
+                            )
 //                        emitter.onError() //Todo error처리
-                    }
-                }, {
-                    if (!emitter.isDisposed) {
-                        // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
-                        Log.e(Tag, "item detail load fail...!! : $it")
-                        emitter.onSuccess(
-                            item.apply {
-                                description = ERROR_DESCRIPTION
-                                keyword = listOf(ERROR_KEYWORD)
-                                image = " unKnown "
-                            }
+                        }
+                    }, {
+                        if (!emitter.isDisposed) {
+                            // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
+                            Log.e(Tag, "item detail load fail...!! : $it")
+                            emitter.onSuccess(
+                                item.apply {
+                                    description = ERROR_DESCRIPTION
+                                    keyword = listOf(ERROR_KEYWORD)
+                                    image = " unKnown "
+                                }
 //                            mapOf(
 //                                "title" to "Unknown",
 //                                "link" to "Unknown",
 //                                "description" to "Unknown",
 //                                "image" to "Unknown"
 //                            )
-                        )
-                        //e.onNext((T) new EmptyData());
+                            )
+                            //e.onNext((T) new EmptyData());
 //                        emitter.onError()  // Todo 에러처리
-                    }
-                }).also { compositeDisposable.add(it) }
+                        }
+                    }).also { compositeDisposable.add(it) }
         }
         return observable
     }
@@ -139,11 +175,17 @@ class RssRepository {
      */
     fun createKeyword(description: String): List<String> {
         if (description == ERROR_DESCRIPTION) return listOf(ERROR_KEYWORD)
-        val regex = Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]")
-        val st = StringTokenizer(description)
+        // 전달받은 본문내용의 특수문자를 제거하고, 빈칸으로 변경
+        Log.d(Tag, "전달받은 본문내용 = $description")
+
+        val modifiedDescription = Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]").replace(description, " ")
+        Log.d(Tag, "수정된 본문내용 = $modifiedDescription")
+
+        val st = StringTokenizer(modifiedDescription)
+
         val map = HashMap<String, Int>()
         while (st.hasMoreTokens()) {
-            val token = regex.replace(st.nextToken(), "")
+            val token = st.nextToken()
             if (token.length < 2 || token.isEmpty() || token.isBlank()) continue
             if (map.containsKey(token)) {
                 map[token] = map[token]!! + 1
@@ -152,7 +194,6 @@ class RssRepository {
             }
         }
 
-        Log.e(Tag, "keyword description = $description")
         Log.e(Tag, "keyword map = $map")
 
         if (map.isEmpty()) return listOf(ERROR_KEYWORD)

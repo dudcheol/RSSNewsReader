@@ -30,10 +30,12 @@ class RssRepository {
 
     fun getRssFeed(): Single<RssFeed> {
         return RetrofitService.rssService(RssInterFace::class.java).getRss()
+            .subscribeOn(Schedulers.io()).retry()
     }
 
     fun getDetailItem(items: List<RssItem>): Single<List<Any>> {
         observableList.clear() // note 여길 초기화하고 진행한다면?
+        Log.e(Tag, "getDetailItem for before")
         for (item in items)
             observableList.add(
                 getApiObservable(
@@ -41,28 +43,19 @@ class RssRepository {
                     item = item
                 )
             )
-//        for (i in 0..3) { // note : 적은 데이터를 불러오는 것 테스트하기 위한 코드
-//            observableList.add(
-//                getApiObservable(
-//                    api = RetrofitService.buildHtmlService(
-//                        feed.channel.item[i].link,
-//                        DocumentInterface::class.java
-//                    ), item = feed.channel.item[i]
-//                )
-//            )
-//        }
+        Log.e(Tag, "getDetailItem for after")
         return combineObservables(observableList = observableList)
     }
 
     /**
      * Observable api call
      * @param api 사용하는 retrofit api interface
-     * @param link url 주소
+     * @param item 전달받은 rss item
      */
     fun getApiObservable(api: DocumentInterface, item: RssItem): Single<Any> {
         val observable = Single.create<Any> { emitter ->
             api.getDocument(item.link)
-//                .retry(3) // Todo : 모든 상황에서 retry는 좋지못함
+                .retry(3) // Todo : 모든 상황에서 retry는 좋지못함
                 .subscribeOn(Schedulers.io())
 //                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(
@@ -113,6 +106,7 @@ class RssRepository {
                                         else ogDescription
                                     keyword = createKeyword(description)
                                     image = ogImage
+                                    Log.e(Tag, "item 잘 담겼나? $item")
                                 }
 //                            HashMap<String, String>().apply {
 //                            put("title", item.title)
@@ -152,7 +146,9 @@ class RssRepository {
                         }
                     }).also { compositeDisposable.add(it) }
         }
-        return observable
+        return observable.apply {
+            Log.e(Tag, "return은 잘 되고 있남?")
+        }
     }
 
     /**
@@ -204,9 +200,11 @@ class RssRepository {
                 else -o1.second.compareTo(o2.second)
             })
 
-        Log.e(Tag, "keyword sorted = $res")
+        Log.e(
+            Tag, "" +
+                    " = $res"
+        )
 
-        // Todo 문제있음. res 0,1,2 가 보장되지않음
         return arrayListOf<String>().apply {
             for (i in res.indices) {
                 if (i >= 3) break

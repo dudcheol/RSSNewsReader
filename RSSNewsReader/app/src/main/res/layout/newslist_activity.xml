@@ -6,8 +6,8 @@
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".view.activity.NewsListActivity"
-        android:background="@color/greyStroke">
+        android:background="@color/greyStroke"
+        tools:context=".view.activity.NewsListActivity">
 
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/list_recycler_placeholder"
@@ -20,12 +20,19 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
+                <!-- Todo 레이아웃  갯수 화면사이즈에 맞게 생성하기 -->
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
+
                 <include layout="@layout/newslist_placeholder" />
             </LinearLayout>
         </com.facebook.shimmer.ShimmerFrameLayout>

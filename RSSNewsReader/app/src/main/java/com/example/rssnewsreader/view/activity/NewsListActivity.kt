@@ -6,7 +6,6 @@ import android.util.Log
 import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.ContextCompat
 import androidx.databinding.DataBindingUtil
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -15,6 +14,7 @@ import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
+import com.example.rssnewsreader.util.NetworkUtil
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
@@ -26,6 +26,7 @@ class NewsListActivity : AppCompatActivity() {
 
     //    private lateinit var adapter: NewsListAdapter
     private var adapter: RSSFeedListAdapter? = null
+    private lateinit var network: NetworkUtil
     private var isInit: Boolean = false
 
     val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
@@ -55,8 +56,6 @@ class NewsListActivity : AppCompatActivity() {
         newsListViewModel = NewsListViewModel()
 
         initSettig()
-
-//        adapter = NewsListAdapter()
 
         binding.listSwipeRefresher.setOnRefreshListener {
             newsListViewModel.clearDisposable()
@@ -100,6 +99,8 @@ class NewsListActivity : AppCompatActivity() {
     }
 
     fun initSettig() {
+        network = NetworkUtil(this)
+        network.register()
         supportActionBar?.run {
             setDisplayShowCustomEnabled(true)
             displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
@@ -157,6 +158,7 @@ class NewsListActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        network.unregister()
         newsListViewModel.clearDisposable()
     }
 }

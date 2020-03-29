@@ -1,5 +1,7 @@
 package com.example.rssnewsreader.view.webview
 
+import android.animation.Animator
+import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.os.Build
 import android.util.Log
@@ -106,18 +108,25 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
 
     fun showBottomSheetWebView(item: RssItem) {
         Log.e(Tag, "$item")
-        binding.webView.run {
-            loadUrl(item.link)
-            webChromeClient = object : WebChromeClient() {
-                override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    binding.bottomSheetProgress.run {
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
-                            setProgress(newProgress, true)
-                        if (newProgress == 100) this.visibility = View.GONE
-                    }
+
+        binding.webView.loadUrl(item.link)
+        binding.webView.webChromeClient = object : WebChromeClient() {
+            override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                binding.bottomSheetProgress.run {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                        setProgress(newProgress, true)
+                    if (newProgress == 100)
+                        this.animate().alpha(0.0F).setDuration(1000)
+                            .setListener(object : AnimatorListenerAdapter() {
+                                override fun onAnimationEnd(animation: Animator?) {
+                                    super.onAnimationEnd(animation)
+                                    visibility = View.GONE
+                                }
+                            })
                 }
             }
         }
+
         binding.bottomSheetTitle.text = item.title
         for (keyword in item?.keyword!!) {
             val chip = Chip(context).apply {

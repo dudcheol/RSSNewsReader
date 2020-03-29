@@ -15,6 +15,7 @@ import io.reactivex.Observable
 import org.jsoup.nodes.Element
 import java.nio.ByteBuffer
 import java.nio.CharBuffer
+import kotlin.math.roundToInt
 
 fun <T> Flowable<T>.toLiveData(): LiveData<T> {
     return LiveDataReactiveStreams.fromPublisher(this)
@@ -33,7 +34,7 @@ fun <T> Observable<T>.toLiveData(backPressureStrategy: BackpressureStrategy): Li
  */
 fun dpToPx(context: Context, dp: Int): Int {
     val displayMetrics = context.resources.displayMetrics
-    return Math.round(dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
+    return (dp * (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
 }
 
 
@@ -46,7 +47,7 @@ fun dpToPx(context: Context, dp: Int): Int {
  */
 fun pxToDp(context: Context, px: Int): Int {
     val displayMetrics = context.resources.displayMetrics
-    return Math.round(px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT))
+    return (px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
 }
 
 

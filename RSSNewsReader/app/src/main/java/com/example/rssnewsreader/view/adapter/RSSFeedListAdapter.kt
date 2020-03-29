@@ -3,12 +3,12 @@ package com.example.rssnewsreader.view.adapter
 import android.content.Context
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
@@ -17,7 +17,6 @@ import com.bumptech.glide.Glide
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.util.dpToPx
-import com.facebook.shimmer.Shimmer
 import com.facebook.shimmer.ShimmerFrameLayout
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
@@ -162,14 +161,15 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         val keywordGroup = itemView?.findViewById<ChipGroup>(R.id.list_item_keyword_group)
 
         fun bind(item: RssItem?, context: Context) {
-            card?.layoutParams?.apply {
-                height = dpToPx(context, ITEM_HEIGHT_DP)
-            }.run { card?.layoutParams = this }
+//            card?.layoutParams?.apply {
+//                height = dpToPx(context, ITEM_HEIGHT_DP)
+//            }.run { card?.layoutParams = this }
 
             title?.text = item?.title
             content?.text = item?.description
 
             keywordGroup?.removeAllViews()
+            keywordGroup?.isClickable = false
             for (keyword in item?.keyword!!) {
                 val chip = Chip(context).apply {
                     setChipDrawable(
@@ -180,7 +180,6 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                             R.style.Widget_MaterialComponents_Chip_Action
                         )
                     )
-                    isClickable = false
                     text = keyword
                     textSize = 15F
                     textAlignment = Chip.TEXT_ALIGNMENT_CENTER
@@ -194,14 +193,15 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
             Glide.with(context)
                 .load(item?.image)
-                .placeholder(R.color.whiteColor)
+                .placeholder(R.color.greyBackground2)
                 .error(R.drawable.ic_news_icon_dark)
                 .into(image!!)
 
-            card?.setOnClickListener {
-                //nextPage
-                item?.let { adapterClickListener.setOnClickListener(it) }
-                Log.e(Tag, "내용 : ${item}")
+            card?.run {
+                setOnClickListener {
+                    item?.let { adapterClickListener.setOnClickListener(it) }
+                    Log.e(Tag, "내용 : ${item}")
+                }
             }
         }
     }

@@ -23,22 +23,22 @@
             android:adjustViewBounds="true"
             android:scaleType="centerCrop" />
 
-        <LinearLayout
+        <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
 
             <TextView
                 android:id="@+id/list_item_title"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:gravity="center_vertical"
                 android:includeFontPadding="false"
+                android:maxHeight="45dp"
                 android:maxLines="1"
 
                 android:paddingLeft="10dp"
-                android:paddingTop="10dp"
+                android:paddingTop="15dp"
                 android:paddingRight="10dp"
                 android:text="뉴스 제목"
                 android:textColor="@android:color/black"
@@ -48,11 +48,13 @@
             <TextView
                 android:id="@+id/list_item_content"
                 android:layout_width="match_parent"
-                android:layout_height="55dp"
-
+                android:layout_height="wrap_content"
+                android:layout_centerVertical="true"
                 android:ellipsize="end"
+
                 android:includeFontPadding="false"
                 android:maxLines="2"
+                android:minHeight="55dp"
                 android:paddingLeft="10dp"
                 android:paddingTop="10dp"
                 android:paddingRight="10dp"
@@ -64,11 +66,13 @@
             <HorizontalScrollView
                 android:layout_width="match_parent"
                 android:layout_height="40dp"
+                android:layout_alignParentBottom="true"
                 android:background="@android:color/transparent"
                 android:clipToPadding="false"
                 android:overScrollMode="never"
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
+                android:paddingBottom="5dp"
                 android:scrollbars="none">
 
                 <com.google.android.material.chip.ChipGroup
@@ -80,7 +84,7 @@
                     app:chipSpacingHorizontal="5dp"
                     app:singleLine="true" />
             </HorizontalScrollView>
-        </LinearLayout>
+        </RelativeLayout>
     </LinearLayout>
     <!--    </com.google.android.material.card.MaterialCardView>-->
 </layout>

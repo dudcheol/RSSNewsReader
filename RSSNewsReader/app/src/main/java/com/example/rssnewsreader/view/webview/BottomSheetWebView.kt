@@ -2,12 +2,17 @@ package com.example.rssnewsreader.view.webview
 
 import android.content.Context
 import android.graphics.Bitmap
+import android.os.Build
 import android.util.Log
+import android.view.LayoutInflater
 import android.view.View
+import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.FrameLayout
+import androidx.databinding.DataBindingUtil
 import com.example.rssnewsreader.R
+import com.example.rssnewsreader.databinding.BottomSheetWebviewBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -19,6 +24,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
 
     private val mBottomSheetDialog: BottomSheetDialog = BottomSheetDialog(context)
     private var mCurrentWebViewScrollY = 0
+    private lateinit var binding: BottomSheetWebviewBinding
 
     companion object {
         const val Tag = "BottomSheetWebView"
@@ -31,7 +37,12 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
     }
 
     private fun inflateLayout(context: Context) {
-        inflate(context, R.layout.bottom_sheet_webview, this)
+        binding = DataBindingUtil.inflate(
+            LayoutInflater.from(context),
+            R.layout.bottom_sheet_webview,
+            this,
+            true
+        )
 
         mBottomSheetDialog.run {
             dismissWithAnimation = true
@@ -65,7 +76,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     }
                 })
 
-                bottom_sheet_close_botton.setOnClickListener {
+                binding.bottomSheetCloseBotton.setOnClickListener {
                     behaviour.state = BottomSheetBehavior.STATE_HIDDEN
                 }
             }
@@ -73,40 +84,35 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
     }
 
     private fun setupWebView() {
-        webView.onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
-            override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
-                mCurrentWebViewScrollY = t
+        binding.webView.run {
+            onScrollChangedCallback = object : ObservableWebView.OnScrollChangeListener {
+                override fun onScrollChanged(l: Int, t: Int, oldl: Int, oldt: Int) {
+                    mCurrentWebViewScrollY = t
+                }
             }
-        }
-        webView.run {
             webViewClient = WebViewClient()
             settings.run {
                 javaScriptEnabled = true
                 useWideViewPort = true
-
             }
         }
     }
 
     fun showBottomSheetWebView(item: RssItem) {
         Log.e(Tag, "$item")
-        webView.loadUrl(item.link)
-        webView.webViewClient = object : WebViewClient() {
-            override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                webView_placeholder.run {
-                    startShimmer()
-                    visibility = View.VISIBLE
-                }
-            }
-
-            override fun onPageFinished(view: WebView?, url: String?) {
-                webView_placeholder.run {
-                    stopShimmer()
-                    visibility = View.GONE
+        binding.webView.run {
+            loadUrl(item.link)
+            webChromeClient = object : WebChromeClient() {
+                override fun onProgressChanged(view: WebView?, newProgress: Int) {
+                    binding.bottomSheetProgress.run {
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
+                            setProgress(newProgress, true)
+                        if (newProgress == 100) this.visibility = View.GONE
+                    }
                 }
             }
         }
-        bottom_sheet_title.text = item.title
+        binding.bottomSheetTitle.text = item.title
         for (keyword in item?.keyword!!) {
             val chip = Chip(context).apply {
                 setChipDrawable(
@@ -122,15 +128,11 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                 textSize = 15F
                 textAlignment = Chip.TEXT_ALIGNMENT_CENTER
                 animation = null
-//                    setTextColor(ContextCompat.getColor(context, R.color.mainLightColor))
                 setChipBackgroundColorResource(R.color.greyBackground2)
                 setRippleColorResource(R.color.alpha0)
             }
-            bottom_sheet_keyword_group?.addView(chip)
+            binding.bottomSheetKeywordGroup.addView(chip)
         }
-//        bottom_sheet_keyword_1.text = item.keyword[0]
-//        bottom_sheet_keyword_2.text = item.keyword[1]
-//        bottom_sheet_keyword_3.text = item.keyword[2]
         mBottomSheetDialog.show()
     }
 

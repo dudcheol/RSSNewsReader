@@ -1,101 +1,99 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/bottom_sheet"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@android:color/transparent">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <androidx.cardview.widget.CardView
+    <RelativeLayout
+        android:id="@+id/bottom_sheet"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_marginBottom="-16dp"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="0dp">
+        android:background="@android:color/transparent">
 
-        <RelativeLayout
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:layout_marginBottom="-16dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
 
             <RelativeLayout
-                android:id="@+id/bottom_sheet_toolbar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:paddingTop="15dp">
+                android:layout_height="match_parent">
 
-                <TextView
-                    android:id="@+id/bottom_sheet_title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_alignParentStart="true"
-                    android:layout_marginLeft="15dp"
-                    android:layout_toStartOf="@id/bottom_sheet_close_botton"
-                    android:ellipsize="end"
-
-                    android:includeFontPadding="false"
-                    android:maxLines="2"
-                    android:text="제목입니다제목입니다제목입니다제목입니다"
-                    android:textColor="@android:color/black"
-                    android:textSize="20dp"
-                    android:textStyle="bold" />
-
-                <HorizontalScrollView
+                <androidx.core.widget.ContentLoadingProgressBar
+                    android:id="@+id/bottom_sheet_progress"
+                    style="@style/Widget.AppCompat.ProgressBar.Horizontal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_below="@id/bottom_sheet_title"
-                    android:clipToPadding="false"
-                    android:overScrollMode="never"
-                    android:paddingStart="7dp"
-                    android:paddingEnd="7dp"
-                    android:scrollbars="none">
+                    android:layout_alignBottom="@id/bottom_sheet_toolbar"
+                    android:layout_alignParentTop="true"
+                    android:max="100"
+                    android:progressDrawable="@drawable/webview_progress" />
 
-                    <com.google.android.material.chip.ChipGroup
-                        android:id="@+id/bottom_sheet_keyword_group"
+                <RelativeLayout
+                    android:id="@+id/bottom_sheet_toolbar"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="15dp">
+
+                    <TextView
+                        android:id="@+id/bottom_sheet_title"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        app:chipSpacingHorizontal="5dp"
-                        app:singleLine="true" />
-                </HorizontalScrollView>
+                        android:layout_alignParentStart="true"
+                        android:layout_marginStart="15dp"
+                        android:layout_toStartOf="@id/bottom_sheet_close_botton"
+                        android:ellipsize="end"
 
-                <ImageView
-                    android:id="@+id/bottom_sheet_close_botton"
-                    android:layout_width="18dp"
-                    android:layout_height="18dp"
-                    android:layout_alignParentRight="true"
-                    android:layout_marginLeft="15dp"
-                    android:layout_marginRight="15dp"
-                    android:src="@drawable/ic_close" />
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:text="제목입니다제목입니다제목입니다제목입니다"
+                        android:textColor="@android:color/black"
+                        android:textSize="20dp"
+                        android:textStyle="bold" />
 
-            </RelativeLayout>
+                    <HorizontalScrollView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_below="@id/bottom_sheet_title"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:paddingStart="7dp"
+                        android:paddingEnd="7dp"
+                        android:scrollbars="none">
 
-            <View
-                android:id="@+id/divider"
-                android:layout_width="match_parent"
-                android:layout_height="0.5dp"
-                android:layout_below="@id/bottom_sheet_toolbar"
-                android:background="@android:color/darker_gray" />
+                        <com.google.android.material.chip.ChipGroup
+                            android:id="@+id/bottom_sheet_keyword_group"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            app:chipSpacingHorizontal="5dp"
+                            app:singleLine="true" />
+                    </HorizontalScrollView>
 
-            <com.example.rssnewsreader.view.webview.ObservableWebView
-                android:id="@+id/webView"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/divider"
-                android:layout_marginBottom="16dp"
-                android:overScrollMode="never" />
+                    <ImageView
+                        android:id="@+id/bottom_sheet_close_botton"
+                        android:layout_width="18dp"
+                        android:layout_height="18dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_marginLeft="15dp"
+                        android:layout_marginRight="15dp"
+                        android:src="@drawable/ic_close" />
+                </RelativeLayout>
 
-            <com.facebook.shimmer.ShimmerFrameLayout
-                android:id="@+id/webView_placeholder"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_below="@id/divider"
-                app:shimmer_duration="2000">
                 <View
+                    android:id="@+id/divider"
+                    android:layout_width="match_parent"
+                    android:layout_height="0.5dp"
+                    android:layout_below="@id/bottom_sheet_toolbar"
+                    android:background="@android:color/darker_gray" />
+
+                <com.example.rssnewsreader.view.webview.ObservableWebView
+                    android:id="@+id/webView"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:background="@color/greyStroke"/>
-            </com.facebook.shimmer.ShimmerFrameLayout>
-        </RelativeLayout>
-    </androidx.cardview.widget.CardView>
-
-
-</RelativeLayout>
+                    android:layout_below="@id/divider"
+                    android:layout_marginBottom="16dp"
+                    android:overScrollMode="never" />
+            </RelativeLayout>
+        </androidx.cardview.widget.CardView>
+    </RelativeLayout>
+</layout>

@@ -1,7 +1,6 @@
 package com.example.rssnewsreader.view.webview
 
 import android.content.Context
-import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import android.view.LayoutInflater
@@ -18,7 +17,6 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
-import kotlinx.android.synthetic.main.bottom_sheet_webview.view.*
 
 class BottomSheetWebView(context: Context) : FrameLayout(context) {
 
@@ -44,6 +42,11 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
             true
         )
 
+        binding.bottomSheetSwipeUp.run {
+            setAnimation("swipe-up.json")
+            playAnimation()
+        }
+
         mBottomSheetDialog.run {
             dismissWithAnimation = true
             setContentView(this@BottomSheetWebView)
@@ -57,6 +60,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
             BottomSheetBehavior.from(view).let { behaviour ->
                 behaviour.state = BottomSheetBehavior.STATE_HALF_EXPANDED
                 behaviour.skipCollapsed = true
+                behaviour.halfExpandedRatio = 0.6F
 
                 behaviour.addBottomSheetCallback(object :
                     BottomSheetBehavior.BottomSheetCallback() {
@@ -67,9 +71,11 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         Log.e(Tag, "current state = $newState")
                         if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                            // this is where we check if webview can scroll up or not and based on that we let BottomSheet close on scroll down
+                            if (binding.bottomSheetSwipeUp.visibility == View.VISIBLE)
+                                binding.bottomSheetSwipeUp.visibility = View.GONE
                             if (mCurrentWebViewScrollY > 0)
                                 behaviour.state = BottomSheetBehavior.STATE_EXPANDED
+                        } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                         } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             close()
                         }

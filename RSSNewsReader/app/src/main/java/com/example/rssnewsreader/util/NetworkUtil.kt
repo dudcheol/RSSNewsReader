@@ -7,9 +7,19 @@ import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import android.widget.Toast
 
-class NetworkUtil(private var context: Context) : ConnectivityManager.NetworkCallback() {
+class NetworkUtil(
+    private val context: Context
+) : ConnectivityManager.NetworkCallback() {
     private var networkRequest: NetworkRequest? = null
     private var connectivityManager: ConnectivityManager? = null
+
+    interface NetworkAvailableListener {
+        fun setNetworkAvailableListener()
+    }
+
+    interface NetworkLostListener {
+        fun setNetworkLostListener()
+    }
 
     init {
         this.networkRequest =
@@ -20,7 +30,7 @@ class NetworkUtil(private var context: Context) : ConnectivityManager.NetworkCal
 
     fun register() {
         connectivityManager =
-            context!!.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
         connectivityManager!!.registerNetworkCallback(networkRequest!!, this)
     }
 
@@ -32,13 +42,15 @@ class NetworkUtil(private var context: Context) : ConnectivityManager.NetworkCal
         super.onAvailable(network)
         // Do what you need to do here
         // 네트워크가 연결되었을 때 할 동작
-        Toast.makeText(this.context, "network available", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this.context, "network available", Toast.LENGTH_SHORT).show()
+//        networkAvailableListener.setNetworkAvailableListener()
     }
 
     override fun onLost(network: Network) {
         super.onLost(network)
         // Do what you need to do here
         // 네트워크 연결이 끊겼을 때 할 동작
-        Toast.makeText(this.context, "network available", Toast.LENGTH_SHORT).show()
+//        Toast.makeText(this.context, "network available", Toast.LENGTH_SHORT).show()
+//        networkLostListener.setNetworkLostListener()
     }
 }

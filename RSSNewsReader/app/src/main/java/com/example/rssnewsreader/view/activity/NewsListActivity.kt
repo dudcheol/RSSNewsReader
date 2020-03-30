@@ -19,6 +19,7 @@ import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import com.example.rssnewsreader.view.webview.BottomSheetWebView
+import com.google.android.material.snackbar.Snackbar
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
@@ -28,6 +29,7 @@ class NewsListActivity : AppCompatActivity() {
     private var adapter: RSSFeedListAdapter? = null
     private lateinit var network: NetworkUtil
     private var isInit: Boolean = false
+//    private var isOnline: Boolean = false
 
     val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
         override fun setOnClickListener(item: RssItem) {
@@ -40,6 +42,7 @@ class NewsListActivity : AppCompatActivity() {
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
             Log.e(Tag, "onLoadMore!!!")
+//            if (!isOnline) return
             adapter?.setProgressMore(true)
             newsListViewModel.loadMoreRssFeed()
         }
@@ -58,6 +61,10 @@ class NewsListActivity : AppCompatActivity() {
         initSettig()
 
         binding.listSwipeRefresher.setOnRefreshListener {
+//            if (!isOnline) {
+//                binding.listSwipeRefresher.isRefreshing = false
+//                return@setOnRefreshListener
+//            }
             newsListViewModel.clearDisposable()
             // Todo : refesh 시 뷰모델 초기화하는게 좋을지.. (메모리관련) 고민!
             adapter?.suppressLoadingRss(true)

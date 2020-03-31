@@ -11,7 +11,6 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.rssnewsreader.model.action.NewsListAction
-import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.repository.RssRepository
@@ -26,8 +25,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     val context = application.applicationContext
     val state = MutableLiveData<NewsListState>()
     private var currentState: NewsListState? = null
-    val effect = MutableLiveData<NewsListState.Effect>()
-//    val networkState = MutableLiveData<Boolean>()
 
     private val __singleLiveEvent = SingleLiveEvent<Any>()
     val singleLiveEvent: LiveData<Any>
@@ -35,23 +32,13 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
 
     private val compositeDisposable = CompositeDisposable()
 
-    private val _rssFeedLiveData = MutableLiveData<RssFeed>()
-    val rssFeedLiveData: LiveData<RssFeed>
-        get() = _rssFeedLiveData
-
-    //    var detailItemLiveData: MutableLiveData<ArrayList<HashMap<String, String>>> = MutableLiveData()
-    private val _detailItemLiveData = MutableLiveData<List<RssItem>>()
-    val detailItemLiveData: LiveData<List<RssItem>>
-        get() = _detailItemLiveData
-
-    val rssFeedCnt = MutableLiveData<Int>()
     var rssFeedTotalCount = 0
     private var currentFeedPos = 0
     private lateinit var rssFeedList: List<RssItem>
 
     companion object {
         const val Tag = "NewsListViewModel"
-        const val THE_NUMBER_WANT_TO_ADD = 2 // note 스크롤될때마다 추가되는 아이템의 갯수
+        const val THE_NUMBER_WANT_TO_ADD = 2 // note : 스크롤될때마다 추가되는 아이템의 갯수
     }
 
     private fun update(newState: NewsListState) {
@@ -61,6 +48,7 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             }
             is NewsListState.Initialize -> state.postValue(NewsListState.Initialize(newState.initItems))
             is NewsListState.Refresh -> state.postValue(NewsListState.Refresh)
+            is NewsListState.LoadMore -> state.postValue(NewsListState.LoadMore(newState.addedRssItems))
             is NewsListState.Online -> {
                 state.postValue(NewsListState.Online)
                 return
@@ -69,7 +57,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                 state.postValue(NewsListState.Offline)
                 return
             }
-            is NewsListState.LoadMore -> state.postValue(NewsListState.LoadMore(newState.addedRssItems))
         }
         currentState = newState
     }
@@ -78,7 +65,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         when (action) {
             is NewsListAction.SwipeRefesh -> handleSwipeRefreshAction()
             is NewsListAction.ScrollList -> handleScrollListAction()
-//            is NewsListAction.NetWork -> handleNetworkChangeAction(action.isOnline)
         }
     }
 
@@ -93,15 +79,10 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         Log.e(Tag, "MVI... 스크롤 액션을 감지했습니다!")
     }
 
-    private fun handleNetworkChangeAction(isOnline: Boolean) {
-
-    }
-
     fun observeNetwork() {
-        val networkRequest =
-            NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
+        val networkRequest = NetworkRequest
+            .Builder().addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
         val connectivityManager =
             context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
 
@@ -111,19 +92,16 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                 override fun onLost(network: Network) {
                     super.onLost(network)
                     update(NewsListState.Offline)
-//                networkState.postValue(false)
                 }
 
                 override fun onUnavailable() {
                     super.onUnavailable()
                     update(NewsListState.Offline)
-//                networkState.postValue(false)
                 }
 
                 override fun onAvailable(network: Network) {
                     super.onAvailable(network)
                     update(NewsListState.Online)
-//                networkState.postValue(true)
                 }
             })
     }
@@ -134,17 +112,15 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             .subscribeOn(Schedulers.io())
 //            .observeOn(AndroidSchedulers.mainThread())
             .subscribe({
-                // note : success
+                // success
                 rssFeedList = it.channel.item
                 rssFeedTotalCount = rssFeedList.size
                 Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
                 currentFeedPos = getOptimalItemSizeInit()
-                it.run {
-                    if (channel.item.isNotEmpty())
-                        getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
-                }
+                if (it.channel.item.isNotEmpty())
+                    getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
             }, {
-                // note : error
+                // error
             }).also { compositeDisposable.add(it) }
     }
 
@@ -162,19 +138,15 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     }
 
     // start~end 까지의 item이 담긴 리스트 생성
-    fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> {
+    private fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> {
         Log.e(Tag, "createLoadRssItemList가 전달받은 items = $items")
         return if (end > items.lastIndex) {
-            if (start > items.lastIndex) {
-                listOf()
-            } else items.subList(start, items.lastIndex + 1)
-        } else {
-            items.subList(start, end)
-        }
+            if (start > items.lastIndex) listOf()
+            else items.subList(start, items.lastIndex + 1)
+        } else items.subList(start, end)
     }
 
-    fun getDetailItems(items: List<RssItem>) {
-        // Todo : 전부 다 전달받은 후에 리턴하지말고 그때그때 받아온 데이터를 리턴하자
+    private fun getDetailItems(items: List<RssItem>) {
         if (items.isNullOrEmpty()) return
         val observable = RssRepository.getInstance().getDetailItem(items)
         observable
@@ -182,50 +154,13 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
-//                    val castedValue = t?.filterIsInstance<HashMap<String, String>>().apply {
-                    // note 여기서 t에 중복 들어와있음
-                    Log.e(
-                        Tag,
-                        "getDetailItems - observable - onNext : ${it}"
-                    )
-//                    _detailItemLiveData.postValue(it as List<RssItem>)
-
-                    Log.e(Tag, "현재 상태가 초기화인가? ${currentState ?: "null"}")
                     if (currentState == null || currentState is NewsListState.Refresh)
                         update(NewsListState.Initialize(it as List<RssItem>))
                     else update(NewsListState.LoadMore(it as List<RssItem>))
-//                    when (currentState ?: NewsListState.Initialize()) {
-//                        is NewsListState.Initialize -> update(NewsListState.Initialize(it as List<RssItem>))
-//                        is NewsListState.LoadMore -> update(NewsListState.LoadMore(it as List<RssItem>))
-//                    }
                 }, { e ->
                     Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }).also { compositeDisposable.add(it) }
-//            .subscribe(object : Observer<List<Any>> {
-//                override fun onComplete() {
-//                    Log.e(Tag, "getDetailItems - observable - onComplete")
-//                }
-//
-//                override fun onSubscribe(d: Disposable) {
-//                    compositeDisposable.add(d)
-//                }
-//
-//                override fun onNext(t: List<Any>) {
-////                    val castedValue = t?.filterIsInstance<HashMap<String, String>>().apply {
-//                    // note 여기서 t에 중복 들어와있음
-//                    Log.e(
-//                        Tag,
-//                        "getDetailItems - observable - onNext : ${(t as List<HashMap<String, String>>).toString()}"
-//                    )
-//                    _detailItemLiveData.postValue(t as List<HashMap<String, String>>)
-//                }
-//
-//                override fun onError(e: Throwable) {
-//                    Log.e(Tag, "getDetailItems - observable - onError : $e")
-//                }
-//            })
     }
-
 
     fun getOptimalItemSizeInit(): Int {
         return (context.resources.displayMetrics.heightPixels / dpToPx(
@@ -241,7 +176,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         Log.e(Tag, "clearDisposable -> before : ${compositeDisposable.size()}")
         compositeDisposable.clear()
         Log.e(Tag, "clearDisposable -> after : ${compositeDisposable.size()}")
-
         RssRepository.getInstance().clearDisposable()
     }
 

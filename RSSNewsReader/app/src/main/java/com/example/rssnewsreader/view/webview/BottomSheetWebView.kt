@@ -116,7 +116,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N)
                         setProgress(newProgress, true)
                     if (newProgress == 100)
-                        this.animate().alpha(0.0F).setDuration(1000)
+                        this.animate().alpha(0.0F).setDuration(1500)
                             .setListener(object : AnimatorListenerAdapter() {
                                 override fun onAnimationEnd(animation: Animator?) {
                                     super.onAnimationEnd(animation)

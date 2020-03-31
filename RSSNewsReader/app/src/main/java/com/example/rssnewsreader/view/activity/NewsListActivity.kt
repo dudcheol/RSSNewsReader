@@ -27,13 +27,11 @@ class NewsListActivity : AppCompatActivity() {
     private var adapter: RSSFeedListAdapter? = null
     private var isInit: Boolean = false
 
-    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
-        override fun setOnClickListener(item: RssItem) {
-            BottomSheetWebView(this@NewsListActivity).run {
-                showBottomSheetWebView(item)
-            }
-        }
-    }
+//    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
+//        override fun setOnClickListener(item: RssItem) {
+//            BottomSheetWebView(this@NewsListActivity).showBottomSheetWebView(item)
+//        }
+//    }
 
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
@@ -75,34 +73,6 @@ class NewsListActivity : AppCompatActivity() {
             }
         }
         newsListViewModel.state.observe(this, stateObserver)
-
-//        newsListViewModel.detailItemLiveData.observe(this,
-//            Observer {
-//                Log.e(Tag, "newsListViewModel detailItemLiveData : it size ${it.size} , ${it}")
-//                binding.listRecyclerPlaceholder.run {
-//                    stopShimmer()
-//                    visibility = View.GONE
-//                }
-//
-//                if (!isInit || adapter == null) {
-//                    binding.listSwipeRefresher.isRefreshing = false
-//                    adapter?.suppressLoadingRss(false)
-//                    adapter = createRssAdapter(
-//                        it,
-//                        newsListViewModel.rssFeedTotalCount,
-//                        onLoadMoreListener,
-//                        LinearLayoutManager(this@NewsListActivity),
-//                        binding.listRecycler
-//                    )
-//                    isInit = true
-//                } else {
-//                    adapter?.run {
-//                        setProgressMore(false)
-//                        addItemMore(it)
-//                        setMoreLoading(false)
-//                    }
-//                }
-//            })
     }
 
     private fun initList(items: List<RssItem>) {
@@ -119,7 +89,6 @@ class NewsListActivity : AppCompatActivity() {
             LinearLayoutManager(this@NewsListActivity),
             binding.listRecycler
         )
-//        isInit = true
     }
 
     private fun loadMoreList(addedItems: List<RssItem>){
@@ -177,7 +146,6 @@ class NewsListActivity : AppCompatActivity() {
             this,
             items,
             itemsSize,
-            onAdapterClickListener,
             onLoadMoreListener,
             linearLayoutManager
         ).apply {
@@ -195,4 +163,3 @@ class NewsListActivity : AppCompatActivity() {
         newsListViewModel.clearDisposable()
     }
 }
-

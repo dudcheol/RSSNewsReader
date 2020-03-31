@@ -3,6 +3,17 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <data>
+
+        <variable
+            name="actor"
+            type="com.example.rssnewsreader.model.action.NewsListActor" />
+
+        <variable
+            name="state"
+            type="com.example.rssnewsreader.model.state.NewsListState" />
+    </data>
+
     <RelativeLayout
         android:id="@+id/news_list_layout"
         android:layout_width="match_parent"
@@ -41,7 +52,8 @@
         <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
             android:id="@+id/list_swipe_refresher"
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            app:onRefreshListener="@{() -> actor.onSwipeRefresh()}">
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/list_recycler"

@@ -1,8 +1,11 @@
 package com.example.rssnewsreader.model.state
 
+import com.example.rssnewsreader.model.datamodel.RssItem
+
 sealed class NewsListState {
     // Note : Sealed 클래스 내부에 작성된 클래스는 Sealed클래스를 상속할 수 있음
-    object ReceiveRss : NewsListState()
-    object Reload : NewsListState()
-    object clicked : NewsListState()
+    data class RssItems(val rssItems: List<RssItem>) : NewsListState()
+    object Refresh : NewsListState()
+
+    abstract class Effect : NewsListState()
 }

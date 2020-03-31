@@ -1,18 +1,27 @@
 package com.example.rssnewsreader.model.viewmodel
 
+import android.app.Application
 import android.util.Log
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.ViewModel
+import com.example.rssnewsreader.model.action.NewsListAction
 import com.example.rssnewsreader.model.datamodel.RssFeed
 import com.example.rssnewsreader.model.datamodel.RssItem
+import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.repository.RssRepository
 import com.example.rssnewsreader.util.SingleLiveEvent
+import com.example.rssnewsreader.util.dpToPx
+import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 
-class NewsListViewModel : ViewModel() {
+class NewsListViewModel(application: Application) : AndroidViewModel(application) {
+    val context = application.applicationContext
+    val state = MutableLiveData<NewsListState>()
+    val effect = MutableLiveData<NewsListState.Effect>()
+
     private val __singleLiveEvent = SingleLiveEvent<Any>()
     val singleLiveEvent: LiveData<Any>
         get() = __singleLiveEvent
@@ -36,6 +45,32 @@ class NewsListViewModel : ViewModel() {
     companion object {
         const val Tag = "NewsListViewModel"
         const val THE_NUMBER_WANT_TO_ADD = 2 // note 스크롤될때마다 추가되는 아이템의 갯수
+    }
+
+    private fun update(newState: NewsListState) {
+        when (newState) {
+            is NewsListState.Effect -> {
+                // note LiveEvent를 사용하는 것이 더 나을듯 싶음
+            }
+            is NewsListState.Refresh -> {
+                // note postvalue를 사용할 것
+                Log.e(Tag, "MVI... refresh 뷰모델!")
+                state.value = NewsListState.Refresh
+            }
+        }
+    }
+
+    fun takeAction(action: NewsListAction) {
+        when (action) {
+            is NewsListAction.SwipeRefesh -> handleSwipeRefreshAction()
+        }
+    }
+
+    private fun handleSwipeRefreshAction() {
+        Log.e(Tag, "MVI... SWIPE!")
+        clearDisposable()
+        initRssFeed(getOptimalItemSizeInit())
+        update(NewsListState.Refresh)
     }
 
     fun initRssFeed(itemCnt: Int) {
@@ -126,6 +161,14 @@ class NewsListViewModel : ViewModel() {
 //                    Log.e(Tag, "getDetailItems - observable - onError : $e")
 //                }
 //            })
+    }
+
+
+    fun getOptimalItemSizeInit(): Int {
+        return (context.resources.displayMetrics.heightPixels / dpToPx(
+            context,
+            RSSFeedListAdapter.ITEM_HEIGHT_DP
+        )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
     }
 
     /** Todo

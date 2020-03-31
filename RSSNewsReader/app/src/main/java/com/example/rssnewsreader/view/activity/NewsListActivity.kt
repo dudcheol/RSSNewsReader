@@ -12,7 +12,9 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
+import com.example.rssnewsreader.model.action.NewsListActor
 import com.example.rssnewsreader.model.datamodel.RssItem
+import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.NetworkUtil
 import com.example.rssnewsreader.util.dpToPx
@@ -56,23 +58,41 @@ class NewsListActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         Log.e(Tag, "$Tag onCreate!")
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
-        newsListViewModel = NewsListViewModel()
+        newsListViewModel = NewsListViewModel(application)
 
         initSettig()
 
-        binding.listSwipeRefresher.setOnRefreshListener {
-//            if (!isOnline) {
-//                binding.listSwipeRefresher.isRefreshing = false
-//                return@setOnRefreshListener
-//            }
-            newsListViewModel.clearDisposable()
-            // Todo : refesh 시 뷰모델 초기화하는게 좋을지.. (메모리관련) 고민!
-            adapter?.suppressLoadingRss(true)
-            adapter = null
-            newsListViewModel.initRssFeed(getOptimalItemSizeInit())
-        }
+        //  note : MVI 만들기
 
-        newsListViewModel.initRssFeed(getOptimalItemSizeInit())
+        //        val actor = NewsListActor(newsListViewModel::takeAction)
+        binding.actor = NewsListActor(newsListViewModel::takeAction)
+
+        val stateObserver = Observer<NewsListState> {
+            it ?: return@Observer
+
+            when(it){
+                is NewsListState.Refresh -> refreshAdapter()
+            }
+        }
+        newsListViewModel.state.observe(this, stateObserver)
+
+
+
+
+
+//        binding.listSwipeRefresher.setOnRefreshListener {
+////            if (!isOnline) {
+////                binding.listSwipeRefresher.isRefreshing = false
+////                return@setOnRefreshListener
+////            }
+////            newsListViewModel.clearDisposable()
+//            // Todo : refesh 시 뷰모델 초기화하는게 좋을지.. (메모리관련) 고민!
+//            adapter?.suppressLoadingRss(true)
+//            adapter = null
+////            newsListViewModel.initRssFeed(getOptimalItemSizeInit())
+//        }
+
+//        newsListViewModel.initRssFeed(getOptimalItemSizeInit())
 
         newsListViewModel.detailItemLiveData.observe(this,
             Observer {
@@ -105,7 +125,7 @@ class NewsListActivity : AppCompatActivity() {
             })
     }
 
-    fun initSettig() {
+    private fun initSettig() {
         network = NetworkUtil(this)
         network.register()
         supportActionBar?.run {
@@ -128,6 +148,12 @@ class NewsListActivity : AppCompatActivity() {
             itemAnimator = null
         }
         binding.listRecyclerPlaceholder.startShimmer()
+    }
+
+    private fun refreshAdapter(){
+        Log.e(Tag, "MVI... 어댑터를 초기화 하겠습니다!")
+        adapter?.suppressLoadingRss(true)
+        adapter = null
     }
 
     fun createRssAdapter(
@@ -154,14 +180,14 @@ class NewsListActivity : AppCompatActivity() {
         }
     }
 
-    fun getOptimalItemSizeInit(): Int {
-        val point = Point()
-        windowManager.defaultDisplay.getSize(point)
-        return (point.y / dpToPx(
-            this,
-            RSSFeedListAdapter.ITEM_HEIGHT_DP
-        )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
-    }
+//    fun getOptimalItemSizeInit(): Int {
+//        val point = Point()
+//        windowManager.defaultDisplay.getSize(point)
+//        return (point.y / dpToPx(
+//            this,
+//            RSSFeedListAdapter.ITEM_HEIGHT_DP
+//        )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
+//    }
 
     override fun onDestroy() {
         super.onDestroy()

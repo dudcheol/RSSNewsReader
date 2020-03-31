@@ -1,6 +1,5 @@
 package com.example.rssnewsreader.view.activity
 
-import android.graphics.Point
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -16,22 +15,17 @@ import com.example.rssnewsreader.model.action.NewsListActor
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
-import com.example.rssnewsreader.util.NetworkUtil
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
 import com.example.rssnewsreader.view.webview.BottomSheetWebView
-import com.google.android.material.snackbar.Snackbar
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
     lateinit var newsListViewModel: NewsListViewModel
 
-    //    private lateinit var adapter: NewsListAdapter
     private var adapter: RSSFeedListAdapter? = null
-    private lateinit var network: NetworkUtil
     private var isInit: Boolean = false
-//    private var isOnline: Boolean = false
 
     val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
         override fun setOnClickListener(item: RssItem) {
@@ -44,7 +38,6 @@ class NewsListActivity : AppCompatActivity() {
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
             Log.e(Tag, "onLoadMore!!!")
-//            if (!isOnline) return
             adapter?.setProgressMore(true)
             newsListViewModel.loadMoreRssFeed()
         }
@@ -60,74 +53,86 @@ class NewsListActivity : AppCompatActivity() {
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
         newsListViewModel = NewsListViewModel(application)
 
-        initSettig()
+        init()
 
-        //  note : MVI 만들기
-
-        //        val actor = NewsListActor(newsListViewModel::takeAction)
         binding.actor = NewsListActor(newsListViewModel::takeAction)
 
         val stateObserver = Observer<NewsListState> {
             it ?: return@Observer
 
-            when(it){
+            when (it) {
+                is NewsListState.Initialize -> initList(it.initItems)
                 is NewsListState.Refresh -> refreshAdapter()
+                is NewsListState.Online -> binding.newsListNetworkWarning.run {
+                    visibility = View.GONE
+                    setOnTouchListener { _, _ -> false }
+                }
+                is NewsListState.Offline -> binding.newsListNetworkWarning.run {
+                    visibility = View.VISIBLE
+                    setOnTouchListener { _, _ -> true }
+                }
+                is NewsListState.LoadMore -> loadMoreList(it.addedRssItems)
             }
         }
         newsListViewModel.state.observe(this, stateObserver)
 
-
-
-
-
-//        binding.listSwipeRefresher.setOnRefreshListener {
-////            if (!isOnline) {
-////                binding.listSwipeRefresher.isRefreshing = false
-////                return@setOnRefreshListener
-////            }
-////            newsListViewModel.clearDisposable()
-//            // Todo : refesh 시 뷰모델 초기화하는게 좋을지.. (메모리관련) 고민!
-//            adapter?.suppressLoadingRss(true)
-//            adapter = null
-////            newsListViewModel.initRssFeed(getOptimalItemSizeInit())
-//        }
-
-//        newsListViewModel.initRssFeed(getOptimalItemSizeInit())
-
-        newsListViewModel.detailItemLiveData.observe(this,
-            Observer {
-                Log.e(Tag, "newsListViewModel detailItemLiveData : it size ${it.size} , ${it}")
-//                it ?: return@Observer
-//                adapter.submitList(it)
-                binding.listRecyclerPlaceholder.run {
-                    stopShimmer()
-                    visibility = View.GONE
-                }
-
-                if (!isInit || adapter == null) {
-                    binding.listSwipeRefresher.isRefreshing = false
-                    adapter?.suppressLoadingRss(false)
-                    adapter = createRssAdapter(
-                        it,
-                        newsListViewModel.rssFeedTotalCount,
-                        onLoadMoreListener,
-                        LinearLayoutManager(this@NewsListActivity),
-                        binding.listRecycler
-                    )
-                    isInit = true
-                } else {
-                    adapter?.run {
-                        setProgressMore(false)
-                        addItemMore(it)
-                        setMoreLoading(false)
-                    }
-                }
-            })
+//        newsListViewModel.detailItemLiveData.observe(this,
+//            Observer {
+//                Log.e(Tag, "newsListViewModel detailItemLiveData : it size ${it.size} , ${it}")
+//                binding.listRecyclerPlaceholder.run {
+//                    stopShimmer()
+//                    visibility = View.GONE
+//                }
+//
+//                if (!isInit || adapter == null) {
+//                    binding.listSwipeRefresher.isRefreshing = false
+//                    adapter?.suppressLoadingRss(false)
+//                    adapter = createRssAdapter(
+//                        it,
+//                        newsListViewModel.rssFeedTotalCount,
+//                        onLoadMoreListener,
+//                        LinearLayoutManager(this@NewsListActivity),
+//                        binding.listRecycler
+//                    )
+//                    isInit = true
+//                } else {
+//                    adapter?.run {
+//                        setProgressMore(false)
+//                        addItemMore(it)
+//                        setMoreLoading(false)
+//                    }
+//                }
+//            })
     }
 
-    private fun initSettig() {
-        network = NetworkUtil(this)
-        network.register()
+    private fun initList(items: List<RssItem>) {
+        binding.listRecyclerPlaceholder.run {
+            stopShimmer()
+            visibility = View.GONE
+        }
+        binding.listSwipeRefresher.isRefreshing = false
+        adapter?.suppressLoadingRss(false)
+        adapter = createRssAdapter(
+            items,
+            newsListViewModel.rssFeedTotalCount,
+            onLoadMoreListener,
+            LinearLayoutManager(this@NewsListActivity),
+            binding.listRecycler
+        )
+//        isInit = true
+    }
+
+    private fun loadMoreList(addedItems: List<RssItem>){
+        adapter?.run {
+            setProgressMore(false)
+            addItemMore(addedItems)
+            setMoreLoading(false)
+        }
+    }
+
+    private fun init() {
+        newsListViewModel.observeNetwork()
+
         supportActionBar?.run {
             setDisplayShowCustomEnabled(true)
             displayOptions = ActionBar.DISPLAY_SHOW_CUSTOM
@@ -138,19 +143,24 @@ class NewsListActivity : AppCompatActivity() {
             )
             elevation = 0F
         }
+
         binding.listSwipeRefresher.run {
             setColorSchemeResources(R.color.whiteColor)
             setProgressBackgroundColorSchemeResource(R.color.mainDarkColor)
         }
+
         binding.listRecycler.run {
             setHasFixedSize(true)
             addItemDecoration(getRecyclerPaddingItemDeco(dpToPx(context, 5)))
             itemAnimator = null
         }
+
         binding.listRecyclerPlaceholder.startShimmer()
+
+        newsListViewModel.initRssFeed()
     }
 
-    private fun refreshAdapter(){
+    private fun refreshAdapter() {
         Log.e(Tag, "MVI... 어댑터를 초기화 하겠습니다!")
         adapter?.suppressLoadingRss(true)
         adapter = null
@@ -180,18 +190,8 @@ class NewsListActivity : AppCompatActivity() {
         }
     }
 
-//    fun getOptimalItemSizeInit(): Int {
-//        val point = Point()
-//        windowManager.defaultDisplay.getSize(point)
-//        return (point.y / dpToPx(
-//            this,
-//            RSSFeedListAdapter.ITEM_HEIGHT_DP
-//        )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
-//    }
-
     override fun onDestroy() {
         super.onDestroy()
-        network.unregister()
         newsListViewModel.clearDisposable()
     }
 }

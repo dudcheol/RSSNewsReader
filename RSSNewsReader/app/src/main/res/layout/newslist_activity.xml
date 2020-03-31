@@ -12,6 +12,10 @@
         <variable
             name="state"
             type="com.example.rssnewsreader.model.state.NewsListState" />
+
+        <variable
+            name="isOnline"
+            type="com.example.rssnewsreader.model.viewmodel.NewsListViewModel" />
     </data>
 
     <RelativeLayout
@@ -61,5 +65,29 @@
                 android:layout_height="match_parent"
                 android:overScrollMode="never" />
         </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+        <RelativeLayout
+            android:id="@+id/news_list_network_warning"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@color/darkAlphaBlack"
+            android:visibility="gone">
+
+            <androidx.cardview.widget.CardView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:padding="24dp"
+                    android:textSize="16dp"
+                    android:text="네트워크 연결을 확인해주세요\n불안정한 환경에서는\n서비스를 이용할 수 없습니다"
+                    android:textColor="@android:color/black" />
+            </androidx.cardview.widget.CardView>
+        </RelativeLayout>
     </RelativeLayout>
 </layout>

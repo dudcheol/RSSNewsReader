@@ -20,4 +20,5 @@
 
     <color name="alpha0">#00FFFFFF</color>
     <color name="halfAlphaBlack">#12000000</color>
+    <color name="darkAlphaBlack">#A8000000</color>
 </resources>

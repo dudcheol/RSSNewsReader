@@ -1,6 +1,11 @@
 package com.example.rssnewsreader.model.viewmodel
 
 import android.app.Application
+import android.content.Context
+import android.net.ConnectivityManager
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkRequest
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -20,7 +25,9 @@ import io.reactivex.schedulers.Schedulers
 class NewsListViewModel(application: Application) : AndroidViewModel(application) {
     val context = application.applicationContext
     val state = MutableLiveData<NewsListState>()
+    private var currentState: NewsListState? = null
     val effect = MutableLiveData<NewsListState.Effect>()
+//    val networkState = MutableLiveData<Boolean>()
 
     private val __singleLiveEvent = SingleLiveEvent<Any>()
     val singleLiveEvent: LiveData<Any>
@@ -52,28 +59,76 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             is NewsListState.Effect -> {
                 // note LiveEvent를 사용하는 것이 더 나을듯 싶음
             }
-            is NewsListState.Refresh -> {
-                // note postvalue를 사용할 것
-                Log.e(Tag, "MVI... refresh 뷰모델!")
-                state.value = NewsListState.Refresh
+            is NewsListState.Initialize -> state.postValue(NewsListState.Initialize(newState.initItems))
+            is NewsListState.Refresh -> state.postValue(NewsListState.Refresh)
+            is NewsListState.Online -> {
+                state.postValue(NewsListState.Online)
+                return
             }
+            is NewsListState.Offline -> {
+                state.postValue(NewsListState.Offline)
+                return
+            }
+            is NewsListState.LoadMore -> state.postValue(NewsListState.LoadMore(newState.addedRssItems))
         }
+        currentState = newState
     }
 
     fun takeAction(action: NewsListAction) {
         when (action) {
             is NewsListAction.SwipeRefesh -> handleSwipeRefreshAction()
+            is NewsListAction.ScrollList -> handleScrollListAction()
+//            is NewsListAction.NetWork -> handleNetworkChangeAction(action.isOnline)
         }
     }
 
     private fun handleSwipeRefreshAction() {
-        Log.e(Tag, "MVI... SWIPE!")
-        clearDisposable()
-        initRssFeed(getOptimalItemSizeInit())
+        Log.e(Tag, "MVI... 뷰모델에서 스와이프 액션을 감지했습니다!")
         update(NewsListState.Refresh)
+        clearDisposable()
+        initRssFeed()
     }
 
-    fun initRssFeed(itemCnt: Int) {
+    private fun handleScrollListAction() {
+        Log.e(Tag, "MVI... 스크롤 액션을 감지했습니다!")
+    }
+
+    private fun handleNetworkChangeAction(isOnline: Boolean) {
+
+    }
+
+    fun observeNetwork() {
+        val networkRequest =
+            NetworkRequest.Builder()
+                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI).build()
+        val connectivityManager =
+            context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+
+        connectivityManager.registerNetworkCallback(
+            networkRequest!!,
+            object : ConnectivityManager.NetworkCallback() {
+                override fun onLost(network: Network) {
+                    super.onLost(network)
+                    update(NewsListState.Offline)
+//                networkState.postValue(false)
+                }
+
+                override fun onUnavailable() {
+                    super.onUnavailable()
+                    update(NewsListState.Offline)
+//                networkState.postValue(false)
+                }
+
+                override fun onAvailable(network: Network) {
+                    super.onAvailable(network)
+                    update(NewsListState.Online)
+//                networkState.postValue(true)
+                }
+            })
+    }
+
+    fun initRssFeed() {
         Log.e("Track", "initRssFeed 진입")
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
@@ -83,8 +138,7 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                 rssFeedList = it.channel.item
                 rssFeedTotalCount = rssFeedList.size
                 Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
-//                rssFeedCnt.postValue(rssFeedList.size)
-                currentFeedPos = itemCnt
+                currentFeedPos = getOptimalItemSizeInit()
                 it.run {
                     if (channel.item.isNotEmpty())
                         getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
@@ -134,7 +188,16 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                         Tag,
                         "getDetailItems - observable - onNext : ${it}"
                     )
-                    _detailItemLiveData.postValue(it as List<RssItem>)
+//                    _detailItemLiveData.postValue(it as List<RssItem>)
+
+                    Log.e(Tag, "현재 상태가 초기화인가? ${currentState ?: "null"}")
+                    if (currentState == null || currentState is NewsListState.Refresh)
+                        update(NewsListState.Initialize(it as List<RssItem>))
+                    else update(NewsListState.LoadMore(it as List<RssItem>))
+//                    when (currentState ?: NewsListState.Initialize()) {
+//                        is NewsListState.Initialize -> update(NewsListState.Initialize(it as List<RssItem>))
+//                        is NewsListState.LoadMore -> update(NewsListState.LoadMore(it as List<RssItem>))
+//                    }
                 }, { e ->
                     Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }).also { compositeDisposable.add(it) }

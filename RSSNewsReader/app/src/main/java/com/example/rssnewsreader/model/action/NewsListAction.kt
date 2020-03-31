@@ -6,5 +6,6 @@ sealed class NewsListAction {
      */
     object ClickItem : NewsListAction()
     object SwipeRefesh : NewsListAction()
-    object SwipeBottom : NewsListAction()
+    object ScrollList : NewsListAction()
+    data class NetWork(val isOnline: Boolean) : NewsListAction()
 }

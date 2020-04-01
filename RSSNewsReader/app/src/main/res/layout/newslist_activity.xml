@@ -7,7 +7,7 @@
 
         <variable
             name="actor"
-            type="com.example.rssnewsreader.model.action.NewsListActor" />
+            type="com.example.rssnewsreader.model.state.NewsListActor" />
 
         <variable
             name="state"

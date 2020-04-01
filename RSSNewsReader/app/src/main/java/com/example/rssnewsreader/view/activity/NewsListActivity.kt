@@ -11,27 +11,19 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistActivityBinding
-import com.example.rssnewsreader.model.action.NewsListActor
 import com.example.rssnewsreader.model.datamodel.RssItem
+import com.example.rssnewsreader.model.state.NewsListActor
 import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
-import com.example.rssnewsreader.view.webview.BottomSheetWebView
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
     lateinit var newsListViewModel: NewsListViewModel
 
     private var adapter: RSSFeedListAdapter? = null
-    private var isInit: Boolean = false
-
-//    val onAdapterClickListener = object : RSSFeedListAdapter.AdapterClickListener {
-//        override fun setOnClickListener(item: RssItem) {
-//            BottomSheetWebView(this@NewsListActivity).showBottomSheetWebView(item)
-//        }
-//    }
 
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
@@ -91,7 +83,7 @@ class NewsListActivity : AppCompatActivity() {
         )
     }
 
-    private fun loadMoreList(addedItems: List<RssItem>){
+    private fun loadMoreList(addedItems: List<RssItem>) {
         adapter?.run {
             setProgressMore(false)
             addItemMore(addedItems)

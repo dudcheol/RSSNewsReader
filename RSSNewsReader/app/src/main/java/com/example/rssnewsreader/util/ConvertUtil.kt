@@ -50,29 +50,6 @@ fun pxToDp(context: Context, px: Int): Int {
     return (px / (displayMetrics.xdpi / DisplayMetrics.DENSITY_DEFAULT)).roundToInt()
 }
 
-
-fun convertCharset(elem: Element): String {
-    Log.e("ConvertUtil", "들어온 element = $elem")
-//    val euc_kr = String(elem.toString().toByteArray(Charsets.ISO_8859_1), Charsets.ISO_8859_1)
-//    Log.e("ConvertUtil", "들어온 문자열을 euc_kr로 변환 = $euc_kr")
-//
-//    val utf_8 = String(euc_kr.toByteArray(Charsets.UTF_8), Charsets.UTF_8)
-//    Log.e("ConvertUtil", "euc_kr을 utf-8로 변환 = $utf_8")
-
-    val cbuffer: CharBuffer = CharBuffer.wrap(
-        String(
-            elem.toString().toByteArray(),
-            Charsets.ISO_8859_1
-        ).toCharArray()
-    )
-    val utf8charset = Charsets.ISO_8859_1
-    val bbuffer: ByteBuffer = utf8charset.encode(cbuffer)
-
-    val tmpDecode = String(bbuffer.array())
-    Log.e("ConvertUtil", "euc_kr을 utf-8로 변환 = $tmpDecode")
-    return tmpDecode
-}
-
 fun getRecyclerPaddingItemDeco(padding : Int): ItemDecoration {
     return object : ItemDecoration() {
         override fun getItemOffsets(

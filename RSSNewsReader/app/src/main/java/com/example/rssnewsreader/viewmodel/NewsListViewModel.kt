@@ -111,7 +111,7 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     }
 
     // start~end 까지의 item이 담긴 리스트 생성
-    private fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> =
+    fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> =
         if (end > items.lastIndex) {
             if (start > items.lastIndex) listOf()
             else items.subList(start, items.lastIndex + 1)
@@ -135,12 +135,11 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                 }).also { compositeDisposable.add(it) }
     }
 
-    private fun getOptimalItemSizeInit(): Int =
+    fun getOptimalItemSizeInit(): Int =
         (context.resources.displayMetrics.heightPixels / dpToPx(
             context,
             RSSFeedListAdapter.ITEM_HEIGHT_DP
         )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
-
 
     /** Todo
      * Observing을 그만두게 될 때(뷰모델이 사라질 때 == 뷰가 사라질 때) compositeDisposable을 비워줌으로서 메모리 누수를 방지하는 작업

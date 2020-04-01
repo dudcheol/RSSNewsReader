@@ -105,6 +105,8 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
             settings.run {
                 javaScriptEnabled = true
                 useWideViewPort = true
+                javaScriptCanOpenWindowsAutomatically = false
+                setSupportMultipleWindows(false)
             }
         }
     }

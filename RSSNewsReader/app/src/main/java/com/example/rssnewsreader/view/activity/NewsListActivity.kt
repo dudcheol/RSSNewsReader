@@ -14,7 +14,7 @@ import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.state.NewsListActor
 import com.example.rssnewsreader.model.state.NewsListState
-import com.example.rssnewsreader.model.viewmodel.NewsListViewModel
+import com.example.rssnewsreader.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter

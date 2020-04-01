@@ -73,11 +73,14 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
                         Log.e(Tag, "current state = $newState")
                         if (newState == BottomSheetBehavior.STATE_DRAGGING) {
-                            if (binding.bottomSheetSwipeUp.visibility == View.VISIBLE)
-                                binding.bottomSheetSwipeUp.visibility = View.GONE
+                            binding.bottomSheetSwipeUp.animate()
+                                .scaleX(0F)
+                                .scaleY(0F)
+                                .setDuration(300)
+                                .withEndAction { binding.bottomSheetSwipeUp.visibility = View.GONE }
+                                .start()
                             if (mCurrentWebViewScrollY > 0)
                                 behaviour.state = BottomSheetBehavior.STATE_EXPANDED
-                        } else if (newState == BottomSheetBehavior.STATE_EXPANDED) {
                         } else if (newState == BottomSheetBehavior.STATE_HIDDEN) {
                             close()
                         }
@@ -128,7 +131,7 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
         }
 
         binding.bottomSheetTitle.text = item.title
-        for (keyword in item?.keyword!!) {
+        for (keyword in item.keyword) {
             val chip = Chip(context).apply {
                 setChipDrawable(
                     ChipDrawable.createFromAttributes(

@@ -1,4 +1,4 @@
-package com.example.rssnewsreader.model.viewmodel
+package com.example.rssnewsreader.viewmodel
 
 import android.app.Application
 import android.content.Context
@@ -9,12 +9,13 @@ import android.net.NetworkRequest
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
-import com.example.rssnewsreader.model.state.NewsListAction
 import com.example.rssnewsreader.model.datamodel.RssItem
+import com.example.rssnewsreader.model.state.NewsListAction
 import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.repository.RssRepository
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
+import com.example.rssnewsreader.view.webview.BottomSheetWebView
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
@@ -87,7 +88,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun initRssFeed() {
-        Log.e("Track", "initRssFeed 진입")
         RssRepository.getInstance().getRssFeed()
             .subscribeOn(Schedulers.io())
             .subscribe({
@@ -99,6 +99,8 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                     getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
             }, {
                 // Todo : error
+                update(NewsListState.Offline)
+                Log.e(Tag, "initRssFeed error : ${it}")
             }).also { compositeDisposable.add(it) }
     }
 
@@ -128,12 +130,16 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                     else update(NewsListState.LoadMore(it as List<RssItem>))
                 }, { e ->
                     // Todo : error
+                    update(NewsListState.Offline)
                     Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }).also { compositeDisposable.add(it) }
     }
 
     private fun getOptimalItemSizeInit(): Int =
-        (context.resources.displayMetrics.heightPixels / dpToPx(context, RSSFeedListAdapter.ITEM_HEIGHT_DP)) + RSSFeedListAdapter.VISIBLE_THRESHOLD
+        (context.resources.displayMetrics.heightPixels / dpToPx(
+            context,
+            RSSFeedListAdapter.ITEM_HEIGHT_DP
+        )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
 
 
     /** Todo

@@ -27,7 +27,7 @@ class RssRepository {
 
     fun getRssFeed(): Single<RssFeed> {
         return RetrofitService.rssService(RssInterFace::class.java).getRss()
-            .subscribeOn(Schedulers.io()).retry()
+            .subscribeOn(Schedulers.io()).retry(3)
     }
 
     fun getDetailItem(items: List<RssItem>): Single<List<Any>> {
@@ -52,7 +52,7 @@ class RssRepository {
     fun getApiObservable(api: DocumentInterface, item: RssItem): Single<Any> {
         val observable = Single.create<Any> { emitter ->
             api.getDocument(item.link)
-                .retry(3) // Todo : 모든 상황에서 retry는 좋지못함
+                .retry(3)
                 .subscribeOn(Schedulers.io())
                 .subscribe(
                     { document ->

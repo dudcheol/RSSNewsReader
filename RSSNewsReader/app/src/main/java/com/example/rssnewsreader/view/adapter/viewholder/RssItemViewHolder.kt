@@ -1,5 +1,6 @@
 package com.example.rssnewsreader.view.adapter.viewholder
 
+import android.app.Application
 import android.content.Context
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -8,6 +9,7 @@ import com.example.rssnewsreader.R
 import com.example.rssnewsreader.databinding.NewslistItemBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.view.webview.BottomSheetWebView
+import com.example.rssnewsreader.viewmodel.NewsListViewModel
 import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipDrawable
 

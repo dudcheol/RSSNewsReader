@@ -15,7 +15,7 @@
 
         <variable
             name="isOnline"
-            type="com.example.rssnewsreader.model.viewmodel.NewsListViewModel" />
+            type="com.example.rssnewsreader.viewmodel.NewsListViewModel" />
     </data>
 
     <RelativeLayout

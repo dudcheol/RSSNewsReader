@@ -92,6 +92,10 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
 
     fun initRssFeed() {
         repository.getRssFeed()
+            .retry { count, throwable ->
+                if (count < 3) true
+                else throwable is IllegalStateException
+            }
             .subscribeOn(Schedulers.io())
             .subscribe({
                 rssFeedList = it.channel.item
@@ -149,42 +153,38 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         Single.create { emitter ->
             repository.getDocument(item.link)
                 .subscribeOn(Schedulers.io())
-                .subscribe(
-                    { document ->
-                        val ogDescription = getDescriptionFromHtml(document)
-                        val ogImage = getImageUrlFromHtml(document)
+                .retry { count, throwable ->
+                    if (count < 3) true
+                    else throwable is IllegalStateException
+                }
+                .subscribe({ document ->
+                    val ogDescription = getDescriptionFromHtml(document)
+                    val ogImage = getImageUrlFromHtml(document)
 
-                        if (!emitter.isDisposed) {
-                            // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
-                            emitter.onSuccess(
-                                item.apply {
-                                    description =
-                                        if (ogDescription.trim().isEmpty()) item.title
-                                        else ogDescription
-                                    keyword = createKeyword(description)
-                                    image = ogImage
-                                    Log.e(RssRepository.Tag, "item 잘 담겼나? $item")
-                                }
-                            )
-//                        emitter.onError() //Todo error처리
-                        }
-                    }, {
-                        if (!emitter.isDisposed) {
-                            // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
-                            Log.e(RssRepository.Tag, "item detail load fail...!! : $it")
-                            emitter.onSuccess(
-                                item.apply {
-                                    description = item.title
-                                    keyword = createKeyword(description)
-                                    image = "not found"
-                                }
-                            )
-                            //e.onNext((T) new EmptyData());
-//                        emitter.onError()  // Todo 에러처리
-                        }
-                    }).also { compositeDisposable.add(it) }
+                    if (!emitter.isDisposed) {
+                        emitter.onSuccess(
+                            item.apply {
+                                description =
+                                    if (ogDescription.trim().isEmpty()) item.title
+                                    else ogDescription
+                                keyword = createKeyword(description)
+                                image = ogImage
+                                Log.e(RssRepository.Tag, "item 잘 담겼나? $item")
+                            }
+                        )
+                    }
+                }, {
+                    if (!emitter.isDisposed) {
+                        emitter.onSuccess(
+                            item.apply {
+                                description = item.title
+                                keyword = createKeyword(description)
+                                image = "not found"
+                            }
+                        )
+                    }
+                }).also { compositeDisposable.add(it) }
         }
-
 
     /**
      * Observable list를 zip()으로 결합

@@ -1,17 +1,12 @@
 package com.example.rssnewsreader.repository
 
-import android.util.Log
 import com.example.rssnewsreader.model.backend.DocumentInterface
 import com.example.rssnewsreader.model.backend.RetrofitService
 import com.example.rssnewsreader.model.backend.RssInterFace
 import com.example.rssnewsreader.model.datamodel.RssFeed
-import com.example.rssnewsreader.model.datamodel.RssItem
 import io.reactivex.Single
-import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import org.jsoup.nodes.Document
-import java.util.*
-import kotlin.collections.ArrayList
 
 class RssRepository {
     companion object {

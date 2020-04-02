@@ -63,9 +63,7 @@ class RSSFeedListAdapter() : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
                 lastVisibleItem = linearLayoutManager.findLastVisibleItemPosition()
 
                 if (!isRefresing && !isModeLoading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + VISIBLE_THRESHOLD)) {
-                    if (onLoadMoreListener != null) {
-                        onLoadMoreListener.onLoadMore()     //Todo : 코틀린스럽게 바꿔보자
-                    }
+                    onLoadMoreListener.onLoadMore()
                     isModeLoading = true
                 }
             }

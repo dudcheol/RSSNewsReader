@@ -4,7 +4,6 @@ import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.webkit.WebChromeClient
@@ -71,7 +70,6 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
                     }
 
                     override fun onStateChanged(bottomSheet: View, newState: Int) {
-                        Log.e(Tag, "current state = $newState")
                         if (newState == BottomSheetBehavior.STATE_DRAGGING) {
                             binding.bottomSheetSwipeUp.animate()
                                 .scaleX(0F)
@@ -112,8 +110,6 @@ class BottomSheetWebView(context: Context) : FrameLayout(context) {
     }
 
     fun showBottomSheetWebView(item: RssItem) {
-        Log.e(Tag, "$item")
-
         binding.webView.loadUrl(item.link)
         binding.webView.webChromeClient = object : WebChromeClient() {
             override fun onProgressChanged(view: WebView?, newProgress: Int) {

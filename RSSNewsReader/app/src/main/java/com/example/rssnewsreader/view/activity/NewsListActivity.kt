@@ -1,7 +1,6 @@
 package com.example.rssnewsreader.view.activity
 
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.ActionBar
 import androidx.appcompat.app.AppCompatActivity
@@ -14,10 +13,10 @@ import com.example.rssnewsreader.databinding.NewslistActivityBinding
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.state.NewsListActor
 import com.example.rssnewsreader.model.state.NewsListState
-import com.example.rssnewsreader.viewmodel.NewsListViewModel
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.util.getRecyclerPaddingItemDeco
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
+import com.example.rssnewsreader.viewmodel.NewsListViewModel
 
 class NewsListActivity : AppCompatActivity() {
     lateinit var binding: NewslistActivityBinding
@@ -27,7 +26,6 @@ class NewsListActivity : AppCompatActivity() {
 
     val onLoadMoreListener = object : RSSFeedListAdapter.OnLoadMoreListener {
         override fun onLoadMore() {
-            Log.e(Tag, "onLoadMore!!!")
             adapter?.setProgressMore(true)
             newsListViewModel.loadMoreRssFeed()
         }
@@ -39,7 +37,6 @@ class NewsListActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        Log.e(Tag, "$Tag onCreate!")
         binding = DataBindingUtil.setContentView(this, R.layout.newslist_activity)
         newsListViewModel = NewsListViewModel(application)
 
@@ -122,7 +119,6 @@ class NewsListActivity : AppCompatActivity() {
     }
 
     private fun refreshAdapter() {
-        Log.e(Tag, "MVI... 어댑터를 초기화 하겠습니다!")
         adapter?.suppressLoadingRss(true)
         adapter = null
     }

@@ -27,9 +27,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:layout_centerInParent="true"
+                android:backgroundTint="@color/whiteColor"
                 android:padding="10dp"
-                android:src="@drawable/ic_news_icon"
-                android:backgroundTint="@color/whiteColor"/>
+                android:src="@drawable/ic_news_icon" />
         </RelativeLayout>
 
         <ImageView
@@ -51,32 +51,29 @@
             android:layout_height="wrap_content"
             android:layout_below="@id/logo"
             android:layout_centerHorizontal="true"
-            android:paddingTop="50dp"
+            android:orientation="vertical"
             android:paddingLeft="50dp"
-            android:paddingRight="50dp"
-            android:orientation="vertical">
+            android:paddingTop="50dp"
+            android:paddingRight="50dp">
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="7dp"
-                android:inputType="textMultiLine"
-                android:text="최신 뉴스를 제공합니다."
+                android:text="@string/description_1"
                 android:textColor="@color/greyIcon" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="7dp"
-                android:inputType="textMultiLine"
-                android:text="뉴스의 키워드를 알아보세요"
+                android:text="@string/description_2"
                 android:textColor="@color/greyIcon" />
 
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:inputType="textMultiLine"
-                android:text="뉴스를 클릭하면 원본 뉴스를 볼 수 있습니다."
+                android:text="@string/description_3"
                 android:textColor="@color/greyIcon" />
         </LinearLayout>
     </RelativeLayout>
@@ -87,7 +84,7 @@
         android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="20dp"
-        android:text="v 1.0"
+        android:text="@string/app_version"
         android:textColor="@color/greyStatus"
         android:textStyle="bold" />
 </RelativeLayout>

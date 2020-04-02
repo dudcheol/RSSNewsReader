@@ -114,7 +114,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         currentFeedPos = nextFeedPos
     }
 
-    // start~end 까지의 item이 담긴 리스트 생성
     fun createLoadRssItemList(items: List<RssItem>, start: Int, end: Int): List<RssItem> =
         if (end > items.lastIndex) {
             if (start > items.lastIndex) listOf()
@@ -123,7 +122,7 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
 
     private fun getDetailItems(items: List<RssItem>) {
         if (items.isNullOrEmpty()) return
-        getDetailItem(items)
+        convertItemsToObservableItems(items)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -142,13 +141,19 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             RSSFeedListAdapter.ITEM_HEIGHT_DP
         )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
 
-    private fun getDetailItem(items: List<RssItem>): Single<List<Any>> {
+    /**
+     * 전달받은 item list를 observableList로 변환하는 작업
+     */
+    private fun convertItemsToObservableItems(items: List<RssItem>): Single<List<Any>> {
         observableList.clear()
         for (item in items)
-            observableList.add(getApiObservable(item = item))
-        return combineObservables(observableList = observableList)
+            observableList.add(getApiObservable(item))
+        return combineObservables(observableList)
     }
 
+    /**
+     * link의 Html Document를 받아와 파싱한 결과를 Single 데이터로 만듦
+     */
     private fun getApiObservable(item: RssItem): Single<Any> =
         Single.create { emitter ->
             repository.getDocument(item.link)
@@ -231,25 +236,16 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
         }
     }
 
-    /**
-     * Html Document에서 description과 image에 해당하는 내용을 뽑아냄
-     */
     fun getDescriptionFromHtml(document: Document): String =
         document.head().select("meta[property=og:description]").attr("content")
 
     fun getImageUrlFromHtml(document: Document): String =
         document.head().select("meta[property=og:image]").attr("content")
 
-    /**
-     * 의도적으로 compositeDisposable을 비움
-     */
     fun clearDisposable() {
         compositeDisposable.clear()
     }
 
-    /**
-     * Observing을 그만두게 될 때(뷰모델이 사라질 때 == 뷰가 사라질 때) compositeDisposable을 비워줌으로서 메모리 누수를 방지하는 작업
-     */
     override fun onCleared() {
         super.onCleared()
         compositeDisposable.clear()

@@ -36,19 +36,15 @@
                 android:layout_height="match_parent"
                 android:orientation="vertical">
 
-                <!-- Todo 레이아웃  갯수 화면사이즈에 맞게 생성하기 -->
                 <include layout="@layout/newslist_placeholder" />
-
                 <include layout="@layout/newslist_placeholder" />
-
                 <include layout="@layout/newslist_placeholder" />
-
                 <include layout="@layout/newslist_placeholder" />
-
                 <include layout="@layout/newslist_placeholder" />
-
                 <include layout="@layout/newslist_placeholder" />
-
+                <include layout="@layout/newslist_placeholder" />
+                <include layout="@layout/newslist_placeholder" />
+                <include layout="@layout/newslist_placeholder" />
                 <include layout="@layout/newslist_placeholder" />
             </LinearLayout>
         </com.facebook.shimmer.ShimmerFrameLayout>
@@ -85,7 +81,7 @@
                     android:layout_height="wrap_content"
                     android:padding="24dp"
                     android:textSize="16dp"
-                    android:text="네트워크 연결을 확인해주세요\n불안정한 환경에서는\n서비스를 이용할 수 없습니다"
+                    android:text="@string/warning_network"
                     android:textColor="@android:color/black" />
             </androidx.cardview.widget.CardView>
         </RelativeLayout>

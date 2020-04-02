@@ -64,30 +64,6 @@ class NewsListActivity : AppCompatActivity() {
         newsListViewModel.state.observe(this, stateObserver)
     }
 
-    private fun initList(items: List<RssItem>) {
-        binding.listRecyclerPlaceholder.run {
-            stopShimmer()
-            visibility = View.GONE
-        }
-        binding.listSwipeRefresher.isRefreshing = false
-        adapter?.suppressLoadingRss(false)
-        adapter = createRssAdapter(
-            items,
-            newsListViewModel.rssFeedTotalCount,
-            onLoadMoreListener,
-            LinearLayoutManager(this@NewsListActivity),
-            binding.listRecycler
-        )
-    }
-
-    private fun loadMoreList(addedItems: List<RssItem>) {
-        adapter?.run {
-            setProgressMore(false)
-            addItemMore(addedItems)
-            setMoreLoading(false)
-        }
-    }
-
     private fun init() {
         newsListViewModel.observeNetwork()
 
@@ -118,12 +94,36 @@ class NewsListActivity : AppCompatActivity() {
         newsListViewModel.initRssFeed()
     }
 
+    private fun initList(items: List<RssItem>) {
+        binding.listRecyclerPlaceholder.run {
+            stopShimmer()
+            visibility = View.GONE
+        }
+        binding.listSwipeRefresher.isRefreshing = false
+        adapter?.suppressLoadingRss(false)
+        adapter = createRssAdapter(
+            items,
+            newsListViewModel.rssFeedTotalCount,
+            onLoadMoreListener,
+            LinearLayoutManager(this@NewsListActivity),
+            binding.listRecycler
+        )
+    }
+
+    private fun loadMoreList(addedItems: List<RssItem>) {
+        adapter?.run {
+            setProgressMore(false)
+            addItemMore(addedItems)
+            setMoreLoading(false)
+        }
+    }
+
     private fun refreshAdapter() {
         adapter?.suppressLoadingRss(true)
         adapter = null
     }
 
-    fun createRssAdapter(
+    private fun createRssAdapter(
         items: List<RssItem>,
         itemsSize: Int,
         onLoadMoreListener: RSSFeedListAdapter.OnLoadMoreListener,

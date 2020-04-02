@@ -6,7 +6,6 @@ import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.MutableLiveData
 import com.example.rssnewsreader.model.datamodel.RssItem
@@ -174,7 +173,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                                     else ogDescription
                                 keyword = createKeyword(description)
                                 image = ogImage
-                                Log.e(RssRepository.Tag, "item 잘 담겼나? $item")
                             }
                         )
                     }

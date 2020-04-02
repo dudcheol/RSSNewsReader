@@ -15,16 +15,20 @@ import com.example.rssnewsreader.model.state.NewsListState
 import com.example.rssnewsreader.repository.RssRepository
 import com.example.rssnewsreader.util.dpToPx
 import com.example.rssnewsreader.view.adapter.RSSFeedListAdapter
-import com.example.rssnewsreader.view.webview.BottomSheetWebView
+import io.reactivex.Single
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
+import org.jsoup.nodes.Document
+import java.util.*
 
 class NewsListViewModel(application: Application) : AndroidViewModel(application) {
     val context = application.applicationContext
     val state = MutableLiveData<NewsListState>()
     private var currentState: NewsListState? = null
     private val compositeDisposable = CompositeDisposable()
+    private val repository: RssRepository = RssRepository.getInstance()
+    private val observableList = ArrayList<Single<Any>>()
 
     var rssFeedTotalCount = 0
     private var currentFeedPos = 0
@@ -59,7 +63,6 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     }
 
     private fun handleSwipeRefreshAction() {
-        Log.e(Tag, "MVI... 뷰모델에서 스와이프 액션을 감지했습니다!")
         update(NewsListState.Refresh)
         clearDisposable()
         initRssFeed()
@@ -88,19 +91,16 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
     }
 
     fun initRssFeed() {
-        RssRepository.getInstance().getRssFeed()
+        repository.getRssFeed()
             .subscribeOn(Schedulers.io())
             .subscribe({
                 rssFeedList = it.channel.item
                 rssFeedTotalCount = rssFeedList.size
-                Log.e(Tag, "total list size = ${it.channel.item.size} 이고, 내용 : ${it.channel.item}")
                 currentFeedPos = getOptimalItemSizeInit()
                 if (it.channel.item.isNotEmpty())
                     getDetailItems(createLoadRssItemList(rssFeedList, 0, currentFeedPos))
             }, {
-                // Todo : error
                 update(NewsListState.Offline)
-                Log.e(Tag, "initRssFeed error : ${it}")
             }).also { compositeDisposable.add(it) }
     }
 
@@ -117,10 +117,9 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             else items.subList(start, items.lastIndex + 1)
         } else items.subList(start, end)
 
-
     private fun getDetailItems(items: List<RssItem>) {
         if (items.isNullOrEmpty()) return
-        RssRepository.getInstance().getDetailItem(items)
+        getDetailItem(items)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -129,9 +128,7 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
                         update(NewsListState.Initialize(it as List<RssItem>))
                     else update(NewsListState.LoadMore(it as List<RssItem>))
                 }, { e ->
-                    // Todo : error
                     update(NewsListState.Offline)
-                    Log.e(Tag, "getDetailItems - observable - onError : $e")
                 }).also { compositeDisposable.add(it) }
     }
 
@@ -141,19 +138,120 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
             RSSFeedListAdapter.ITEM_HEIGHT_DP
         )) + RSSFeedListAdapter.VISIBLE_THRESHOLD
 
-    /** Todo
-     * Observing을 그만두게 될 때(뷰모델이 사라질 때 == 뷰가 사라질 때) compositeDisposable을 비워줌으로서 메모리 누수를 방지하는 작업
-     */
-    fun clearDisposable() {
-        Log.e(Tag, "clearDisposable -> before : ${compositeDisposable.size()}")
-        compositeDisposable.clear()
-        Log.e(Tag, "clearDisposable -> after : ${compositeDisposable.size()}")
-        RssRepository.getInstance().clearDisposable()
+    private fun getDetailItem(items: List<RssItem>): Single<List<Any>> {
+        observableList.clear()
+        for (item in items)
+            observableList.add(getApiObservable(item = item))
+        return combineObservables(observableList = observableList)
     }
 
+    private fun getApiObservable(item: RssItem): Single<Any> =
+        Single.create { emitter ->
+            repository.getDocument(item.link)
+                .subscribeOn(Schedulers.io())
+                .subscribe(
+                    { document ->
+                        val ogDescription = getDescriptionFromHtml(document)
+                        val ogImage = getImageUrlFromHtml(document)
+
+                        if (!emitter.isDisposed) {
+                            // Todo : 이부분... 티몬 잘 봐서 한번 확인해봐야할듯 느낌쎄하다
+                            emitter.onSuccess(
+                                item.apply {
+                                    description =
+                                        if (ogDescription.trim().isEmpty()) item.title
+                                        else ogDescription
+                                    keyword = createKeyword(description)
+                                    image = ogImage
+                                    Log.e(RssRepository.Tag, "item 잘 담겼나? $item")
+                                }
+                            )
+//                        emitter.onError() //Todo error처리
+                        }
+                    }, {
+                        if (!emitter.isDisposed) {
+                            // todo : 에러처리/ 참고) null 불가능 => 정상적으로 응답을 받지 못했을 경우에는 빈 데이터를 발행합니다
+                            Log.e(RssRepository.Tag, "item detail load fail...!! : $it")
+                            emitter.onSuccess(
+                                item.apply {
+                                    description = item.title
+                                    keyword = createKeyword(description)
+                                    image = "not found"
+                                }
+                            )
+                            //e.onNext((T) new EmptyData());
+//                        emitter.onError()  // Todo 에러처리
+                        }
+                    }).also { compositeDisposable.add(it) }
+        }
+
+
+    /**
+     * Observable list를 zip()으로 결합
+     */
+    private fun combineObservables(observableList: List<Single<Any>>): Single<List<Any>> =
+        Single.zip(observableList) { args ->
+            val mapList = arrayListOf<Any>()
+            for (item in args) {
+                mapList.add(item)
+            }
+            mapList
+        }
+
+    /**
+     * note : "2글자 이상"의 "단어"들 중에서 등장 빈도수가 "높은 순서"대로 "3건"(단, 빈도수가 동일할 시 문자정렬 오름차순 적용)
+     */
+    fun createKeyword(description: String): List<String> {
+        // 전달받은 본문내용의 특수문자를 빈칸으로 변경
+        val modifiedDescription = Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z\\s]").replace(description, " ")
+        val st = StringTokenizer(modifiedDescription)
+
+        val map = HashMap<String, Int>()
+        while (st.hasMoreTokens()) {
+            val token = st.nextToken()
+            if (token.length < 2 || token.isEmpty() || token.isBlank()) continue
+            if (map.containsKey(token))
+                map[token] = map[token]!! + 1
+            else
+                map[token] = 1
+        }
+
+        val res = map.toList()
+        if (res.size != 1)
+            Collections.sort(res, kotlin.Comparator { o1, o2 ->
+                if (o1.second == o2.second) o1.first.compareTo(o2.first)
+                else -o1.second.compareTo(o2.second)
+            })
+
+        return arrayListOf<String>().apply {
+            for (i in res.indices) {
+                if (i >= 3) break
+                add(i, res[i].first)
+            }
+        }
+    }
+
+    /**
+     * Html Document에서 description과 image에 해당하는 내용을 뽑아냄
+     */
+    fun getDescriptionFromHtml(document: Document): String =
+        document.head().select("meta[property=og:description]").attr("content")
+
+    fun getImageUrlFromHtml(document: Document): String =
+        document.head().select("meta[property=og:image]").attr("content")
+
+    /**
+     * 의도적으로 compositeDisposable을 비움
+     */
+    fun clearDisposable() {
+        compositeDisposable.clear()
+    }
+
+    /**
+     * Observing을 그만두게 될 때(뷰모델이 사라질 때 == 뷰가 사라질 때) compositeDisposable을 비워줌으로서 메모리 누수를 방지하는 작업
+     */
     override fun onCleared() {
         super.onCleared()
-        Log.e(Tag, "$Tag onCleared")
         compositeDisposable.clear()
     }
 }

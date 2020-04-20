@@ -7,6 +7,7 @@ import android.net.Network
 import android.net.NetworkCapabilities
 import android.net.NetworkRequest
 import androidx.lifecycle.AndroidViewModel
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.example.rssnewsreader.model.datamodel.RssItem
 import com.example.rssnewsreader.model.state.NewsListAction
@@ -23,11 +24,14 @@ import java.util.*
 
 class NewsListViewModel(application: Application) : AndroidViewModel(application) {
     val context = application.applicationContext
-    val state = MutableLiveData<NewsListState>()
     private var currentState: NewsListState? = null
     private val compositeDisposable = CompositeDisposable()
     private val repository: RssRepository = RssRepository.getInstance()
     private val observableList = ArrayList<Single<Any>>()
+    
+    private val _state = MutableLiveData<NewsListState>()
+    val state: LiveData<NewsListState>
+        get() = _state
 
     var rssFeedTotalCount = 0
     private var currentFeedPos = 0
@@ -40,15 +44,15 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
 
     private fun update(newState: NewsListState) {
         when (newState) {
-            is NewsListState.Initialize -> state.postValue(NewsListState.Initialize(newState.initItems))
-            is NewsListState.Refresh -> state.postValue(NewsListState.Refresh)
-            is NewsListState.LoadMore -> state.postValue(NewsListState.LoadMore(newState.addedRssItems))
+            is NewsListState.Initialize -> _state.postValue(NewsListState.Initialize(newState.initItems))
+            is NewsListState.Refresh -> _state.postValue(NewsListState.Refresh)
+            is NewsListState.LoadMore -> _state.postValue(NewsListState.LoadMore(newState.addedRssItems))
             is NewsListState.Online -> {
-                state.postValue(NewsListState.Online)
+                _state.postValue(NewsListState.Online)
                 return
             }
             is NewsListState.Offline -> {
-                state.postValue(NewsListState.Offline)
+                _state.postValue(NewsListState.Offline)
                 return
             }
         }
@@ -206,7 +210,8 @@ class NewsListViewModel(application: Application) : AndroidViewModel(application
      */
     fun createKeyword(description: String): List<String> {
         // 전달받은 본문내용의 특수문자를 빈칸으로 변경
-        val modifiedDescription = Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z%·\\s]").replace(description, " ")
+        val modifiedDescription =
+            Regex("[^\uAC00-\uD7A3xfe0-9a-zA-Z%·\\s]").replace(description, " ")
         val st = StringTokenizer(modifiedDescription)
 
         val map = HashMap<String, Int>()
